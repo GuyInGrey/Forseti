@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using ForsetiFramework;
 
 namespace ForsetiFramework.Modules
 {

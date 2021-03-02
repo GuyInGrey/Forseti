@@ -12,7 +12,7 @@ namespace ForsetiFramework.Modules
 {
     public class Moderation : ModuleBase<SocketCommandContext>
     {
-        static string[] BadWords = File.ReadAllText(Config.Path + "badwords.txt").Replace("\r", "").Split('\n');
+        static string[] HardNoWords = File.ReadAllText(Config.Path + "badwords.txt").Replace("\r", "").Split('\n');
 
         static SocketTextChannel ModLogs => BotManager.Instance.Client.GetChannel(814327531216961616) as SocketTextChannel;
         static SocketTextChannel General => BotManager.Instance.Client.GetChannel(814328175881355304) as SocketTextChannel;
@@ -159,7 +159,7 @@ namespace ForsetiFramework.Modules
             var clearedParts = clearedContent.Split(new[] { " ", "-", "_" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var b2 in clearedParts)
             {
-                foreach (var b in BadWords)
+                foreach (var b in HardNoWords)
                 {
                     if (b2.Equals(b))
                     {
@@ -201,11 +201,12 @@ namespace ForsetiFramework.Modules
         [Syntax("kick <user>")]
         public async Task Kick(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
             reason = reason.EndsWith(".") ? reason : reason + ".";
-            await user.SendMessageAsync($"You have been kicked from {Context.Guild.Name} for {reason}.");
             await user.KickAsync();
             await ModLogs.SendMessageAsync($"{user.Mention} was kicked by {Context.User}.");
             await Context.Message.DeleteAsync();
+            await user.SendMessageAsync($"You have been kicked from {Context.Guild.Name} for {reason}.");
         }
 
         [Command("ban")]
@@ -214,10 +215,11 @@ namespace ForsetiFramework.Modules
         [Syntax("ban <user>")]
         public async Task Ban(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
             reason = reason.EndsWith(".") ? reason : reason + ".";
-            await user.SendMessageAsync($"You have been banned from {Context.Guild.Name} for {reason}");
             await user.BanAsync(0, reason);
             await Context.Message.DeleteAsync();
+            await user.SendMessageAsync($"You have been banned from {Context.Guild.Name} for {reason}");
         }
 
         [Command("unban")]
@@ -227,6 +229,7 @@ namespace ForsetiFramework.Modules
         [Syntax("unban <user>")]
         public async Task Unban(ulong user)
         {
+            if (user == Context.Message.Author.Id) { await this.ReactError(); return; }
             await Context.Guild.RemoveBanAsync(user);
             await ModLogs.SendMessageAsync($"{user} unbanned by {Context.User.Mention}.");
             await Context.Message.DeleteAsync();
@@ -238,13 +241,14 @@ namespace ForsetiFramework.Modules
         [Syntax("mute <user>")]
         public async Task Mute(SocketGuildUser user)
         {
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
             if (!user.Roles.Any(r => r.Name == "Muted"))
             {
                 await user.RemoveRoleAsync(Context.Guild.Roles.First(r => r.Name == "Member"));
                 await user.AddRoleAsync(Context.Guild.Roles.First(r => r.Name == "Muted"));
-                await user.SendMessageAsync($"You have been muted by {Context.User.Mention}.");
                 await ModLogs.SendMessageAsync($"{user.Mention} was muted by {Context.User.Mention}.");
                 await Context.Message.DeleteAsync();
+                await user.SendMessageAsync($"You have been muted by {Context.User.Mention}.");
             }
         }
 
@@ -254,13 +258,14 @@ namespace ForsetiFramework.Modules
         [Syntax("unmute <user>")]
         public async Task Unmute(SocketGuildUser user)
         {
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
             if (user.Roles.Any(r => r.Name == "Muted"))
             {
                 await user.AddRoleAsync(Context.Guild.Roles.First(r => r.Name == "Member"));
                 await user.RemoveRoleAsync(Context.Guild.Roles.First(r => r.Name == "Muted"));
-                await user.SendMessageAsync($"You have been unmuted by {Context.User.Mention}.");
                 await ModLogs.SendMessageAsync($"{user.Mention} was unmuted by {Context.User.Mention}.");
                 await Context.Message.DeleteAsync();
+                await user.SendMessageAsync($"You have been unmuted by {Context.User.Mention}.");
             }
         }
 

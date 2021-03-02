@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -9,7 +8,6 @@ namespace ForsetiFramework.Modules
 {
     public class Utility : ModuleBase<SocketCommandContext>
     {
-
         [Command("help")]
         [Summary("Get a list of tags and commands.")]
         [Syntax("help [command]")]
@@ -112,6 +110,7 @@ namespace ForsetiFramework.Modules
             }
             else
             {
+                if (name.Length > 255) { await this.ReactError(); return; }
                 var t = new Tag()
                 {
                     Name = name.ToLower(),

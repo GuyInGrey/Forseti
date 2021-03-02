@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 using Newtonsoft.Json;
 
 namespace ForsetiFramework.Modules
 {
-    public class Tags
+    public static class Tags
     {
         public static async Task<Tag[]> GetTags()
         {
