@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
+using Discord.Webhook;
+using Discord.WebSocket;
 
 namespace ForsetiFramework.Modules
 {
@@ -50,6 +55,31 @@ namespace ForsetiFramework.Modules
         {
             Console.WriteLine("Throwing Test Error");
             throw new Exception("Test Error!");
+        }
+
+        [Command("sayas")]
+        [RequireRole("staff")]
+        [Summary(";)")]
+        public async Task SayAs(SocketGuildUser usr, [Remainder]string text)
+        {
+            await Context.Message.DeleteAsync();
+
+            var ch = Context.Channel as SocketTextChannel;
+            RestWebhook webhook = null;
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(usr.GetAvatarUrl());
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    var name = usr.Nickname is null ? usr.Username : usr.Nickname;
+                    webhook = await ch.CreateWebhookAsync(name, stream);
+                }
+            }
+
+            var whclient = new DiscordWebhookClient(webhook);
+            await whclient.SendMessageAsync(text);
+            await whclient.DeleteWebhookAsync();
         }
     }
 }

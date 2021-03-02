@@ -139,6 +139,8 @@ namespace ForsetiFramework
 
         private async Task Client_Ready()
         {
+            Console.WriteLine("In guilds: " + string.Join(", ", Client.Guilds.Select(g => g.Name)));
+
             if (Config.Debug) { return; } // Don't post debug ready messages
             var botTesting = Client.GetChannel(814330280969895936) as SocketTextChannel;
             var e = new EmbedBuilder()
