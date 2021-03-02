@@ -166,6 +166,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="LoggingService.cs" />
     <Compile Include="Modules\BotAdmin.cs" />
+    <Compile Include="Modules\Database.cs" />
     <Compile Include="Modules\Moderation.cs" />
     <Compile Include="Modules\PersistentRoles.cs" />
     <Compile Include="Modules\Tags.cs" />

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using ForsetiFramework.Modules;
 using MySql.Data.MySqlClient;
 
 namespace ForsetiFramework
@@ -25,9 +26,9 @@ namespace ForsetiFramework
             return (left, right);
         }
 
-        public static int NonQuery(this string s, MySqlConnection conn, params object[] param)
+        public static int NonQuery(this string s, params object[] param)
         {
-            var cmd = new MySqlCommand(s, conn);
+            var cmd = new MySqlCommand(s, Database.Connection);
             var i = 0;
             foreach (var p in param)
             {
@@ -38,9 +39,9 @@ namespace ForsetiFramework
             return cmd.ExecuteNonQuery();
         }
 
-        public static MySqlDataReader Query(this string s, MySqlConnection conn, params object[] param)
+        public static MySqlDataReader Query(this string s, params object[] param)
         {
-            var cmd = new MySqlCommand(s, conn);
+            var cmd = new MySqlCommand(s, Database.Connection);
             var i = 0;
             foreach (var p in param)
             {
