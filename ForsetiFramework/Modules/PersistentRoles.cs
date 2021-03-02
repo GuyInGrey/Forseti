@@ -29,15 +29,14 @@ namespace ForsetiFramework.Modules
   PRIMARY KEY (`userID`),
   UNIQUE INDEX `userID_UNIQUE` (`userID` ASC) VISIBLE);".NonQuery(Connection);
 
-            BotManager.Instance.Client.UserUpdated += Client_UserUpdated;
+            //BotManager.Instance.Client.UserUpdated += Client_UserUpdated;
             BotManager.Instance.Client.UserJoined += Client_UserJoined;
+            BotManager.Instance.Client.GuildMemberUpdated += Client_UserUpdated;
         }
 
-        private static async Task Client_UserUpdated(SocketUser arg1, SocketUser arg2)
+        private static async Task Client_UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {
-            var guild = BotManager.Instance.Client.GetGuild(769057370646511628);
-            var roles = guild.GetUser(arg2.Id).Roles.Select(r => r.Id);
-            var roleString = string.Join(",", roles);
+            var roleString = string.Join(",", arg2.Roles.Where(r => !r.Name.Contains("everyone")).Select(r => r.Id));
 
             "DELETE FROM `forseti`.`persistentroles` WHERE userID=@p0;".NonQuery(Connection, arg2.Id.ToString());
             "INSERT INTO `forseti`.`persistentroles` (userID, roles) VALUES (@p0, @p1);".NonQuery(Connection, arg2.Id.ToString(), roleString);
@@ -46,29 +45,37 @@ namespace ForsetiFramework.Modules
 
         private static async Task Client_UserJoined(SocketGuildUser arg)
         {
+            var guild = BotManager.Instance.Client.GetGuild(769057370646511628);
+
             var q = "SELECT * FROM `forseti`.`persistentroles` WHERE userID=@p0".Query(Connection, arg.Id);
-            if (q.HasRows)
+            try
             {
-                var guild = BotManager.Instance.Client.GetGuild(769057370646511628);
-
-                await q.ReadAsync();
-                var roles = q["roles"].ToString().Split(',').Select(r => ulong.Parse(r)).ToList();
-                roles.ForEach(r =>
+                if (q.HasRows)
                 {
-                    var role = guild.GetRole(r);
-                    if (!(role is null))
+                    await q.ReadAsync();
+                    var roles = q["roles"].ToString().Split(',').Select(r => ulong.Parse(r)).ToList();
+                    roles.ForEach(r =>
                     {
-                        arg.AddRoleAsync(role);
-                    }
-                });
-                q.Close();
+                        var role = guild.GetRole(r);
+                        if (!(role is null))
+                        {
+                            arg.AddRoleAsync(role);
+                        }
+                    });
 
-                await Moderation.General.SendMessageAsync($"Welcome back, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
-                await Moderation.ModLogs.SendMessageAsync("Added old roles from rejoined user " + arg.Username);
+                    await Moderation.General.SendMessageAsync($"Welcome back, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
+                    await Moderation.ModLogs.SendMessageAsync("Added old roles from rejoined user " + arg.Username);
+                }
+                else
+                {
+                    var memberRole = guild.Roles.FirstOrDefault(r => r.Name == "Member");
+                    await arg.AddRoleAsync(memberRole);
+                    await Moderation.General.SendMessageAsync($"Welcome to the server, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
+                }
             }
-            else
+            finally
             {
-                await Moderation.General.SendMessageAsync($"Welcome to the server, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
+                q.Close();
             }
         }
     }
