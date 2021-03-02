@@ -59,7 +59,7 @@ namespace ForsetiFramework.Modules
 
         [Command("sayas")]
         [RequireRole("staff")]
-        [Summary(";)")]
+        [Syntax("sayas <user> <text>")]
         public async Task SayAs(SocketGuildUser usr, [Remainder]string text)
         {
             await Context.Message.DeleteAsync();
@@ -80,6 +80,15 @@ namespace ForsetiFramework.Modules
             var whclient = new DiscordWebhookClient(webhook);
             await whclient.SendMessageAsync(text);
             await whclient.DeleteWebhookAsync();
+        }
+
+        [Command("say")]
+        [RequireRole("staff")]
+        [Syntax("say <text>")]
+        public async Task Say([Remainder]string text)
+        {
+            await Context.Message.DeleteAsync();
+            await Context.Channel.SendMessageAsync(text);
         }
     }
 }
