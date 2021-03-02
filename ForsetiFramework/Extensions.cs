@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using MySql.Data.MySqlClient;
 
 namespace ForsetiFramework
 {
@@ -22,6 +23,32 @@ namespace ForsetiFramework
             var left = s.Substring(0, index);
             var right = s.Substring(index, s.Length - index);
             return (left, right);
+        }
+
+        public static int NonQuery(this string s, MySqlConnection conn, params object[] param)
+        {
+            var cmd = new MySqlCommand(s, conn);
+            var i = 0;
+            foreach (var p in param)
+            {
+                cmd.Parameters.AddWithValue($"@p{i}", p);
+                i++;
+            }
+
+            return cmd.ExecuteNonQuery();
+        }
+
+        public static MySqlDataReader Query(this string s, MySqlConnection conn, params object[] param)
+        {
+            var cmd = new MySqlCommand(s, conn);
+            var i = 0;
+            foreach (var p in param)
+            {
+                cmd.Parameters.AddWithValue($"@p{i}", p);
+                i++;
+            }
+
+            return cmd.ExecuteReader();
         }
     }
 }

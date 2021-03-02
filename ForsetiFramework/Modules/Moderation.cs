@@ -14,8 +14,8 @@ namespace ForsetiFramework.Modules
     {
         static string[] HardNoWords = File.ReadAllText(Config.Path + "badwords.txt").Replace("\r", "").Split('\n');
 
-        static SocketTextChannel ModLogs => BotManager.Instance.Client.GetChannel(814327531216961616) as SocketTextChannel;
-        static SocketTextChannel General => BotManager.Instance.Client.GetChannel(814328175881355304) as SocketTextChannel;
+        public static SocketTextChannel ModLogs => BotManager.Instance.Client.GetChannel(814327531216961616) as SocketTextChannel;
+        public static SocketTextChannel General => BotManager.Instance.Client.GetChannel(814328175881355304) as SocketTextChannel;
         // User Info, This Is Fine, Warn & Delete, Mute & Delete
         static Emoji[] CardReactions = new[] { "👤", "✅", "⚠", "🔇" }.Select(s => new Emoji(s)).ToArray();
 
@@ -28,12 +28,6 @@ namespace ForsetiFramework.Modules
                 BotManager.Instance.Client.UserBanned += async (usr, guild) => await ModLogs.SendMessageAsync($"{usr.Mention} ({usr.Id}) has been banned.");
                 BotManager.Instance.Client.UserUnbanned += async (usr, guild) => await ModLogs.SendMessageAsync($"{usr.Mention} ({usr.Id}) has been unbanned.");
                 BotManager.Instance.Client.UserLeft += async (usr) => await ModLogs.SendMessageAsync($"{usr.Mention} has left or was kicked.");
-
-                BotManager.Instance.Client.UserJoined += async (usr) =>
-                {
-                    await usr.AddRoleAsync(usr.Guild.Roles.First(r => r.Name == "Member"));
-                    await General.SendMessageAsync($"Welcome to the server, {usr.Mention}! Please make sure to read through <#814326414618132521>.");
-                };
 
                 BotManager.Instance.Client.ReactionAdded += Client_ReactionAdded;
                 BotManager.Instance.Client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
@@ -68,7 +62,7 @@ namespace ForsetiFramework.Modules
                 await msg.ModifyAsync(m =>
                 {
                     var e = msg.Embeds.First().ToEmbedBuilder()
-                        .AddField("Resolved", type, false)
+                        .AddField("Resolved", type + " at " + DateTime.UtcNow, false)
                         .WithColor(Color.Green);
                     m.Embed = new Optional<Embed>(e.Build());
                 });

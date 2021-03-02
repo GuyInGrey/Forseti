@@ -18,6 +18,8 @@ namespace ForsetiFramework
         public string Token;
         [JsonProperty("errorsWebhook")]
         public string ErrorWebhookUrl;
+        [JsonProperty("databaseConnString")]
+        public string DatabaseConnectionString;
 
         public static Config Load(string filePath) => 
             JsonConvert.DeserializeObject<Config>(File.ReadAllText(filePath));

@@ -56,6 +56,7 @@ namespace ForsetiFramework
         public async Task Start()
         {
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+            PersistentRoles.Initialize();
 
             await Client.LoginAsync(TokenType.Bot, Config.Token);
             await Client.StartAsync();
