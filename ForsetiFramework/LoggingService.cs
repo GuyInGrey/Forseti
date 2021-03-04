@@ -59,7 +59,8 @@ namespace ForsetiFramework
                         .AddField("User", ex.Context.User.Username + "#" + ex.Context.User.Discriminator, true)
                         .AddField("Location", ex.Context.Guild.Name + " > " + ex.Context.Channel.Name, true)
                         .AddField("Command", ex.Context.Message.Content, true)
-                        .AddField("Exception Message", ex.InnerException.Message);
+                        .AddField("Exception Message", ex.InnerException.Message)
+                        .AddField("Debug?", Config.Debug);
                     //.AddField("Exception Stack Trace", "```\n" + stack.Replace("\n", "\n ") + "\n```");
 
                     foreach (var s in stackParts)
@@ -75,7 +76,8 @@ namespace ForsetiFramework
                         .WithColor(color)
                         .WithCurrentTimestamp()
                         .WithTitle(arg.Exception.GetType().Name)
-                        .AddField("Exception Message", arg.Exception.Message);
+                        .AddField("Exception Message", arg.Exception.Message)
+                        .AddField("Debug?", Config.Debug);
                     //.AddField("Exception Stack Trace", "```\n" + arg.Exception.StackTrace.Replace("\n", "\n ") + "\n```");
 
                     foreach (var s in stackParts)
@@ -92,7 +94,8 @@ namespace ForsetiFramework
                     .WithColor(Color.Green)
                     .WithCurrentTimestamp()
                     .WithTitle(arg.Message)
-                    .AddField("Severity", arg.Severity);
+                    .AddField("Severity", arg.Severity)
+                    .AddField("Debug?", Config.Debug);
 
                 await ErrorsClient.SendMessageAsync(embeds: new[] { e.Build() });
             }
