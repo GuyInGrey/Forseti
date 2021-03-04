@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Discord;
@@ -31,6 +32,23 @@ namespace ForsetiFramework
 
                 var color = arg.Severity == LogSeverity.Critical ? Color.Red : Color.Orange;
 
+                var stack = arg.Exception.InnerException?.StackTrace;
+                stack = stack is null ? arg.Exception.StackTrace : stack;
+                var stackParts = new List<string>();
+
+                while (stack.Length > 1000)
+                {
+                    var index = stack.Substring(0, 1000).LastIndexOf("\n");
+                    if (index == -1)
+                    {
+                        stack = stack.Insert(500, "\n");
+                        continue;
+                    }
+                    stackParts.Add(stack.Substring(0, index));
+                    stack = stack.Substring(index, stack.Length - index);
+                }
+                stackParts.Add(stack);
+
                 if (arg.Exception is CommandException ex)
                 {
 
@@ -41,8 +59,13 @@ namespace ForsetiFramework
                         .AddField("User", ex.Context.User.Username + "#" + ex.Context.User.Discriminator, true)
                         .AddField("Location", ex.Context.Guild.Name + " > " + ex.Context.Channel.Name, true)
                         .AddField("Command", ex.Context.Message.Content, true)
-                        .AddField("Exception Message", ex.InnerException.Message)
-                        .AddField("Exception Stack Trace", "```\n" + ex.InnerException.StackTrace.Replace("\n", "\n ") + "\n```");
+                        .AddField("Exception Message", ex.InnerException.Message);
+                    //.AddField("Exception Stack Trace", "```\n" + stack.Replace("\n", "\n ") + "\n```");
+
+                    foreach (var s in stackParts)
+                    {
+                        e.AddField("Stack Trace", $"```\n{s}\n```");
+                    }
 
                     await ErrorsClient.SendMessageAsync(embeds: new[] { e.Build() });
                 }
@@ -52,8 +75,13 @@ namespace ForsetiFramework
                         .WithColor(color)
                         .WithCurrentTimestamp()
                         .WithTitle(arg.Exception.GetType().Name)
-                        .AddField("Exception Message", arg.Exception.Message)
-                        .AddField("Exception Stack Trace", "```\n" + arg.Exception.StackTrace.Replace("\n", "\n ") + "\n```");
+                        .AddField("Exception Message", arg.Exception.Message);
+                    //.AddField("Exception Stack Trace", "```\n" + arg.Exception.StackTrace.Replace("\n", "\n ") + "\n```");
+
+                    foreach (var s in stackParts)
+                    {
+                        e.AddField("Stack Trace", $"```\n{s}\n```");
+                    }
 
                     await ErrorsClient.SendMessageAsync(embeds: new[] { e.Build() });
                 }

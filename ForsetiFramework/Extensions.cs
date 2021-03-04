@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -50,6 +52,24 @@ namespace ForsetiFramework
             }
 
             return cmd.ExecuteReader();
+        }
+
+        public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)
+        {
+            var modules = BotManager.Instance.Commands.Modules.ToList();
+            modules.RemoveAll(m =>
+            {
+                foreach (var cmd in m.Commands)
+                {
+                    if (cmd.CheckPreconditionsAsync(c).GetAwaiter().GetResult().IsSuccess)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            return modules;
         }
     }
 }
