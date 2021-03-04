@@ -1,32 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using ForsetiFramework.Modules;
+
 using MySql.Data.MySqlClient;
 
 namespace ForsetiFramework
 {
     public static class Extensions
     {
-        public static async Task ReactOk(this ModuleBase<SocketCommandContext> c)
-        {
+        public static async Task ReactOk(this ModuleBase<SocketCommandContext> c) =>
             await c.Context.Message.AddReactionAsync(new Emoji("👌"));
-        }
 
-        public static async Task ReactError(this ModuleBase<SocketCommandContext> c)
-        {
+        public static async Task ReactError(this ModuleBase<SocketCommandContext> c) =>
             await c.Context.Message.AddReactionAsync(new Emoji("❌"));
-        }
 
-        public static (string Left, string Right) SplitAt(this string s, int index)
-        {
-            var left = s.Substring(0, index);
-            var right = s.Substring(index, s.Length - index);
-            return (left, right);
-        }
+        public static (string left, string right) SplitAt(this string s, int index) =>
+            (s.Substring(0, index), s.Substring(index, s.Length - index));
 
         public static int NonQuery(this string s, params object[] param)
         {
@@ -56,7 +50,7 @@ namespace ForsetiFramework
 
         public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)
         {
-            var modules = BotManager.Instance.Commands.Modules.ToList();
+            var modules = BotManager.Commands.Modules.ToList();
             modules.RemoveAll(m =>
             {
                 foreach (var cmd in m.Commands)
@@ -70,6 +64,36 @@ namespace ForsetiFramework
             });
 
             return modules;
+        }
+
+        public static async Task<List<string>> SplitWithLength(this string s, int length)
+        {
+            var toReturn = new List<string>();
+
+            while (s.Length > length)
+            {
+                var index = s.Substring(0, length).LastIndexOf("\n");
+                if (index == -1)
+                {
+                    s = s.Insert(length / 2, "\n");
+                    continue;
+                }
+                toReturn.Add(s.Substring(0, index));
+                s = s.Substring(index, s.Length - index);
+            }
+            toReturn.Add(s);
+            return toReturn;
+        }
+
+        public static async Task<(SocketGuildChannel channel, IMessage message)> GetMessageFromLink(this string url)
+        {
+            var parts = url.Split('/');
+            var messageId = ulong.Parse(parts[parts.Length - 1]);
+            var channelId = ulong.Parse(parts[parts.Length - 2]);
+
+            var channel = BotManager.Client.GetChannel(channelId) as SocketGuildChannel;
+            var message = await (channel as ITextChannel).GetMessageAsync(messageId);
+            return (channel, message);
         }
     }
 }

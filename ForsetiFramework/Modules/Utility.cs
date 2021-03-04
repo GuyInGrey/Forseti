@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -16,12 +16,12 @@ namespace ForsetiFramework.Modules
 
         static Utility()
         {
-            BotManager.Instance.Client.ReactionAdded += Client_ReactionAdded;
+            BotManager.Client.ReactionAdded += Client_ReactionAdded;
         }
 
         private static async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            if (arg3.UserId == BotManager.Instance.Client.CurrentUser.Id) { return; }
+            if (arg3.UserId == BotManager.Client.CurrentUser.Id) { return; }
             if (!(HelpMenus.ContainsKey(arg1.Id))) { return; }
             var (context, helpMenuMsg) = HelpMenus[arg1.Id];
 
@@ -201,7 +201,7 @@ namespace ForsetiFramework.Modules
         {
             if (cmd != "")
             {
-                foreach (var module in BotManager.Instance.Commands.Modules)
+                foreach (var module in BotManager.Commands.Modules)
                 {
                     foreach (var c in module.Commands)
                     {
@@ -256,7 +256,7 @@ namespace ForsetiFramework.Modules
                 builders.Last().AddField(tag.Name, content);
             }
 
-            foreach (var module in BotManager.Instance.Commands.Modules)
+            foreach (var module in BotManager.Commands.Modules)
             {
                 foreach (var command in module.Commands)
                 {

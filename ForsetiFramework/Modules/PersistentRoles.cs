@@ -1,6 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+
 using Discord.WebSocket;
 
 namespace ForsetiFramework.Modules
@@ -8,6 +8,7 @@ namespace ForsetiFramework.Modules
     public class PersistentRoles
     {
         public static void Initialize() { }
+        public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
 
         static PersistentRoles()
         {
@@ -17,8 +18,8 @@ namespace ForsetiFramework.Modules
   PRIMARY KEY (`userID`),
   UNIQUE INDEX `userID_UNIQUE` (`userID` ASC) VISIBLE);".NonQuery();
 
-            BotManager.Instance.Client.UserJoined += Client_UserJoined;
-            BotManager.Instance.Client.GuildMemberUpdated += Client_UserUpdated;
+            BotManager.Client.UserJoined += Client_UserJoined;
+            BotManager.Client.GuildMemberUpdated += Client_UserUpdated;
         }
 
         private static async Task Client_UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
@@ -30,7 +31,7 @@ namespace ForsetiFramework.Modules
 
         private static async Task Client_UserJoined(SocketGuildUser arg)
         {
-            var guild = BotManager.Instance.Client.GetGuild(769057370646511628);
+            var guild = BotManager.Client.GetGuild(769057370646511628);
 
             var q = "SELECT * FROM `forseti`.`persistentroles` WHERE userID=@p0".Query(arg.Id);
             try
@@ -42,14 +43,14 @@ namespace ForsetiFramework.Modules
                         .Select(r => guild.Roles.FirstOrDefault(r2 => r2.Id == ulong.Parse(r)))
                         .Where(r => !(r is null)).ToList().ForEach(role => arg.AddRoleAsync(role));
 
-                    await Moderation.General.SendMessageAsync($"Welcome back, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
+                    await General.SendMessageAsync($"Welcome back, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
                     await Moderation.ModLogs.SendMessageAsync("Added old roles from rejoined user " + arg.Username);
                 }
                 else
                 {
                     var memberRole = guild.Roles.FirstOrDefault(r => r.Name == "Member");
                     await arg.AddRoleAsync(memberRole);
-                    await Moderation.General.SendMessageAsync($"Welcome to the server, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
+                    await General.SendMessageAsync($"Welcome to the server, {arg.Mention}! Please make sure to read through <#814326414618132521>.");
                 }
             }
             finally

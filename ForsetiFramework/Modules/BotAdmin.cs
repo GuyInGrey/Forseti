@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -34,17 +34,11 @@ namespace ForsetiFramework.Modules
         public async Task Restart(bool update = true)
         {
             await this.ReactOk();
-            await BotManager.Instance.Client.StopAsync();
+            await BotManager.Client.StopAsync();
             Program.Icon.Visible = false;
 
-            if (!Config.Debug && update)
-            {
-                Process.Start("update.bat");
-            }
-            else if (!Config.Debug && !update)
-            {
-                Process.Start("restart.bat");
-            }
+            if (!Config.Debug && update) {  Process.Start("update.bat"); } 
+            else if (!Config.Debug && !update) {  Process.Start("restart.bat"); }
             Environment.Exit(0);
         }
 

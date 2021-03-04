@@ -27,7 +27,8 @@ namespace ForsetiFramework
 
             ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-            new BotManager().Start().GetAwaiter().GetResult();
+            BotManager.Instantiate();
+            BotManager.Start().GetAwaiter().GetResult();
         }
 
         [DllImport("kernel32.dll")]

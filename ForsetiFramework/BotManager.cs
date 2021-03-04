@@ -2,28 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
+
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using ForsetiFramework.Modules;
 
 namespace ForsetiFramework
 {
-    public class BotManager
+    public static class BotManager
     {
-        public static BotManager Instance;
+        public static Config Config;
+        public static LoggingService Logger;
+        public static DiscordSocketClient Client;
+        public static CommandService Commands;
+        public static List<(ulong, IDisposable)> TypingStates = new List<(ulong, IDisposable)>();
 
-        public readonly Config Config;
-        public readonly LoggingService Logger;
-        public readonly DiscordSocketClient Client;
-        public readonly CommandService Commands;
-        public List<(ulong, IDisposable)> TypingStates = new List<(ulong, IDisposable)>();
-
-        public BotManager()
+        public static void Instantiate()
         {
-            Instance = this;
             Config = Config.Load(Config.Path + "config.json");
             Logger = new LoggingService();
 
@@ -53,7 +51,7 @@ namespace ForsetiFramework
             Client.Ready += Client_Ready;
         }
 
-        public async Task Start()
+        public static async Task Start()
         {
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
             Database.Initialize();
@@ -61,10 +59,11 @@ namespace ForsetiFramework
 
             await Client.LoginAsync(TokenType.Bot, Config.Token);
             await Client.StartAsync();
+            Config.Token = "";
             await Task.Delay(-1);
         }
 
-        private async Task Commands_CommandExecuted(Optional<CommandInfo> arg1, ICommandContext context, IResult result)
+        private static async Task Commands_CommandExecuted(Optional<CommandInfo> arg1, ICommandContext context, IResult result)
         {
             if (Config.DoTypingStatus)
             {
@@ -108,7 +107,7 @@ namespace ForsetiFramework
             await commandLog.SendMessageAsync(toSend);
         }
 
-        private async Task HandleCommands(SocketMessage arg)
+        private static async Task HandleCommands(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage msg)) { return; }
 
@@ -137,7 +136,7 @@ namespace ForsetiFramework
             }
         }
 
-        private async Task Client_Ready()
+        private static async Task Client_Ready()
         {
             Console.WriteLine("In guilds: " + string.Join(", ", Client.Guilds.Select(g => g.Name)));
 
@@ -151,7 +150,7 @@ namespace ForsetiFramework
             await botTesting.SendMessageAsync(embed: e.Build());
         }
 
-        private async Task PostTag(Tag tag, ISocketMessageChannel channel, string suffix, SocketUser author)
+        private static async Task PostTag(Tag tag, ISocketMessageChannel channel, string suffix, SocketUser author)
         {
             if (tag.Content != string.Empty)
             {
