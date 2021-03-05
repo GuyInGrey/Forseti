@@ -112,7 +112,7 @@ namespace ForsetiFramework.Modules
                 });
             }
 
-            var url = embed.Fields.First(f => f.Name == "Jump To Post").Value;
+            var url = embed.Fields.First(f => f.Name == "Jump To Post").Value.Replace(")", "");
             var (channel, message) = await url.GetMessageFromLink();
 
             if (r.Emote.Name == CardReactions[0].Name) // React Info

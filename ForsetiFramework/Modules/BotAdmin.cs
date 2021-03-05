@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -37,9 +37,23 @@ namespace ForsetiFramework.Modules
             await BotManager.Client.StopAsync();
             Program.Icon.Visible = false;
 
-            if (!Config.Debug && update) {  Process.Start("update.bat"); } 
-            else if (!Config.Debug && !update) {  Process.Start("restart.bat"); }
+            if (!Config.Debug)
+            {
+                var p = new Process();
+                p.StartInfo = new ProcessStartInfo()
+                {
+                    FileName = update ? "update.bat" : "restart.bat",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                Console.WriteLine("A");
+                p.Start();
+            }
+
+            Console.WriteLine("B");
+            Application.Exit();
             Environment.Exit(0);
+            Console.WriteLine("C");
         }
 
         [Command("testerror")]
