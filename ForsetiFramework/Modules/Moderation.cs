@@ -13,7 +13,10 @@ namespace ForsetiFramework.Modules
 {
     public class Moderation : ModuleBase<SocketCommandContext>
     {
-        static string[] HardNoWords = File.ReadAllText(Config.Path + "badwords.txt").ToLower().Replace("\r", "").Split('\n');
+        static string[] HardNoWords => File.ReadAllText(Config.Path + "badwords.txt").ToLower().Replace("\r", "")
+            .Split('\n').Select(s => s.Trim()).Where(s => s != "").ToArray();
+        static string[] SoftNo => File.ReadAllText(Config.Path + "softwords.txt").ToLower().Replace("\r", "")
+            .Split('\n').Select(s => s.Trim()).Where(s => s != "").ToArray();
 
         public static SocketTextChannel ModLogs => BotManager.Client.GetChannel(814327531216961616) as SocketTextChannel;
         // User Info, This Is Fine, Warn & Delete, Mute & Delete
@@ -36,21 +39,22 @@ namespace ForsetiFramework.Modules
 
         public static async Task CheckMessage(SocketUserMessage m)
         {
-            if (m.Author.IsBot || m.Content is null) { return; }
+            if (m.Author.Id == BotManager.Client.CurrentUser.Id || m.Content is null) { return; }
             var guild = (m.Channel as SocketGuildChannel).Guild;
 
+            var content = m.Content.Replace("`", " ").Replace("\n", " ");
             var card = new EmbedBuilder()
                 .WithTitle("Forseti Entry")
-                .WithDescription(m.Content)
+                .WithDescription(content)
                 .WithAuthor(m.Author)
                 .WithColor(Color.Orange)
                 .WithCurrentTimestamp()
                 .AddField("Channel", $"<#{m.Channel.Id}>", true)
                 .AddField("Jump To Post", $@"[Link](https://discord.com/channels/{guild.Id}/{m.Channel.Id}/{m.Id})", true)
-                .AddField("User ID", m.Author.Id, true);
+                .AddField("User ID", m.Author.IsBot ? "Bot or Webhook" : m.Author.Id.ToString(), true);
 
             // Strict, auto-delete
-            var clearedContent = Regex.Replace(m.Content.ToLower(), "[^a-z1-9 -_]", string.Empty);
+            var clearedContent = Regex.Replace(content.ToLower(), "[^a-z1-9 -_]", string.Empty);
             var clearedParts = clearedContent.Split(new[] { " ", "-", "_" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var b2 in clearedParts)
             {
@@ -58,7 +62,7 @@ namespace ForsetiFramework.Modules
                 {
                     if (b2.Equals(b))
                     {
-                        card.AddField("Flagged", b, true);
+                        card.AddField("Reason", "`b`", true);
                         card.AddField("Auto-Deleted", "Yes", true);
                         card.Color = Color.Red;
                         card.Url = "";
@@ -70,10 +74,19 @@ namespace ForsetiFramework.Modules
             }
 
             // Softer, don't auto-delete
-            var list = new ProfanityFilter.ProfanityFilter().DetectAllProfanities(m.Content);
+            var filter = new ProfanityFilter.ProfanityFilter();
+            filter.AddProfanity(SoftNo);
+            var list = filter.DetectAllProfanities(content);
             if (list.Count > 0)
             {
-                card.AddField("Flagged", string.Join(", ", list), true);
+                card.AddField("Reason", $"`{string.Join("`, `", list)}`", true);
+                await CreateModCard(card);
+                return;
+            }
+
+            if (m.Content.Length > 1000)
+            {
+                card.AddField("Reason", "Message length > 1000", true);
                 await CreateModCard(card);
                 return;
             }
@@ -98,8 +111,9 @@ namespace ForsetiFramework.Modules
             var embed = msg.Embeds.First();
             if (embed.Fields.Any(f => f.Name == "Resolved")) { return; } // Make sure it's not already resolved
 
-            var usrId = ulong.Parse(embed.Fields.First(f => f.Name == "User ID").Value);
-            var usr = (ch as SocketGuildChannel).Guild.GetUser(usrId);
+            var embedUserIDField = embed.Fields.First(f => f.Name == "User ID").Value;
+            var usrId = embedUserIDField == "Bot or Webhook" ? ulong.MaxValue : ulong.Parse(embedUserIDField);
+            var usr = usrId == ulong.MaxValue ? null : (ch as SocketGuildChannel).Guild.GetUser(usrId);
 
             async Task Resolve(string text)
             {
@@ -117,7 +131,14 @@ namespace ForsetiFramework.Modules
 
             if (r.Emote.Name == CardReactions[0].Name) // React Info
             {
-                await User.PostUserInfo(usr, ch as SocketTextChannel);
+                if (!(usr is null))
+                {
+                    await User.PostUserInfo(usr, ch as SocketTextChannel);
+                }
+                else
+                {
+                    await ch.SendMessageAsync("User is bot or webhook.");
+                }
             }
             else if (r.Emote.Name == CardReactions[1].Name) // React OK
             {
@@ -129,24 +150,27 @@ namespace ForsetiFramework.Modules
                 {
                     await message.DeleteAsync();
                     await Resolve("Marked as *Warn & Delete*");
-                    await usr.SendMessageAsync($"{r.User.Value.Mention} has given you a warning for posting inappropriate language, " +
+                    await usr?.SendMessageAsync($"{r.User.Value.Mention} has given you a warning for posting inappropriate language, " +
                         $"links, or other material.\n```{message.Content}\n``` ({message.Attachments.Count} attachment(s))");
                 }
                 else // Message was already auto-deleted, so content is unavailable
                 {
                     await Resolve("Marked as *Warn* by " + r.User.Value.Mention);
-                    await usr.SendMessageAsync($"{r.User.Value.Mention} has given you a warning for posting inappropriate language, " +
+                    await usr?.SendMessageAsync($"{r.User.Value.Mention} has given you a warning for posting inappropriate language, " +
                         $"links, or other material.");
                 }
             }
             else if (r.Emote.Name == CardReactions[3].Name) // React Mute & Delete
             {
-                if (!usr.Roles.Any(r2 => r2.Name == "Muted"))
+                if (!(usr is null))
                 {
-                    await usr.RemoveRoleAsync(channel.Guild.Roles.First(r2 => r2.Name == "Member"));
-                    await usr.AddRoleAsync(channel.Guild.Roles.First(r2 => r2.Name == "Muted"));
-                    await usr.SendMessageAsync($"You have been muted by {r.User.Value.Mention}.");
-                    await ModLogs.SendMessageAsync($"{usr.Mention} was muted by {r.User.Value.Mention}.");
+                    if (!usr.Roles.Any(r2 => r2.Name == "Muted"))
+                    {
+                        await usr.RemoveRoleAsync(channel.Guild.Roles.First(r2 => r2.Name == "Member"));
+                        await usr.AddRoleAsync(channel.Guild.Roles.First(r2 => r2.Name == "Muted"));
+                        await usr.SendMessageAsync($"You have been muted by {r.User.Value.Mention}.");
+                        await ModLogs.SendMessageAsync($"{usr.Mention} was muted by {r.User.Value.Mention}.");
+                    }
                 }
 
                 if (!(message is null))

@@ -169,6 +169,7 @@
     <Compile Include="Modules\Database.cs" />
     <Compile Include="Modules\Moderation.cs" />
     <Compile Include="Modules\PersistentRoles.cs" />
+    <Compile Include="Modules\Statistics.cs" />
     <Compile Include="Modules\Tags.cs" />
     <Compile Include="Modules\User.cs" />
     <Compile Include="Modules\Utility.cs" />
