@@ -104,7 +104,7 @@ namespace ForsetiFramework
                 $"[{msg.Author.Username}#{msg.Author.Discriminator}] " +
                 $"<#{msg.Channel.Id}>> `{msg.Content}`";
 
-            await commandLog.SendMessageAsync(toSend);
+            //await commandLog.SendMessageAsync(toSend);
         }
 
         private static async Task HandleCommands(SocketMessage arg)
