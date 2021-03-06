@@ -24,28 +24,44 @@ namespace ForsetiFramework
 
         public static int NonQuery(this string s, params object[] param)
         {
-            var cmd = new MySqlCommand(s, Database.Connection);
-            var i = 0;
-            foreach (var p in param)
+            try
             {
-                cmd.Parameters.AddWithValue($"@p{i}", p);
-                i++;
-            }
+                var cmd = new MySqlCommand(s, Database.Connection);
+                var i = 0;
+                foreach (var p in param)
+                {
+                    cmd.Parameters.AddWithValue($"@p{i}", p);
+                    i++;
+                }
 
-            return cmd.ExecuteNonQuery();
+                return cmd.ExecuteNonQuery();
+            }
+            catch
+            {
+                Database.ForceReconnect();
+                return NonQuery(s, param);
+            }
         }
 
         public static MySqlDataReader Query(this string s, params object[] param)
         {
-            var cmd = new MySqlCommand(s, Database.Connection);
-            var i = 0;
-            foreach (var p in param)
+            try
             {
-                cmd.Parameters.AddWithValue($"@p{i}", p);
-                i++;
-            }
+                var cmd = new MySqlCommand(s, Database.Connection);
+                var i = 0;
+                foreach (var p in param)
+                {
+                    cmd.Parameters.AddWithValue($"@p{i}", p);
+                    i++;
+                }
 
-            return cmd.ExecuteReader();
+                return cmd.ExecuteReader();
+            }
+            catch
+            {
+                Database.ForceReconnect();
+                return Query(s, param);
+            }
         }
 
         public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)

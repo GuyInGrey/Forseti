@@ -22,11 +22,23 @@ namespace ForsetiFramework.Modules
         {
             if (e.CurrentState == ConnectionState.Closed || e.CurrentState == ConnectionState.Broken)
             {
-                Connection.Dispose();
-                Connection = new MySqlConnection(BotManager.Config.DatabaseConnectionString);
-                try { Connection.Open(); }
-                catch (Exception ex) { Console.WriteLine(ex); return; }
+                ForceReconnect();
             }
+        }
+
+        public static void ForceReconnect()
+        {
+            if (Connection.State == ConnectionState.Open || Connection.State == ConnectionState.Executing || Connection.State == ConnectionState.Fetching)
+            {
+                try
+                {
+                    Connection.Close();
+                } catch { }
+            }
+            Connection.Dispose();
+            Connection = new MySqlConnection(BotManager.Config.DatabaseConnectionString);
+            try { Connection.Open(); }
+            catch (Exception ex) { Console.WriteLine(ex); return; }
         }
     }
 }

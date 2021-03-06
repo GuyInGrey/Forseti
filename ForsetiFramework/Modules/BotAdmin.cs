@@ -46,14 +46,11 @@ namespace ForsetiFramework.Modules
                     UseShellExecute = false,
                     CreateNoWindow = true,
                 };
-                Console.WriteLine("A");
                 p.Start();
             }
 
-            Console.WriteLine("B");
             Application.Exit();
             Environment.Exit(0);
-            Console.WriteLine("C");
         }
 
         [Command("testerror")]
