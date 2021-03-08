@@ -111,7 +111,17 @@ namespace ForsetiFramework.Modules
             var typing = Context.Channel.EnterTypingState();
 
             var startTime = HighResolutionDateTime.UtcNow;
-            (var a, var b) = ((BigInteger)1, (BigInteger)1); for (var i = 0; i < n - 3; i++) { b = a + b; a = b - a; }
+            (var a, var b) = ((BigInteger)1, (BigInteger)1); for (var i = 0; i < n - 3; i++) 
+            {
+                b = a + b; a = b - a; 
+                if ((HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds > 1000 * 60 * 5)
+                {
+                    typing.Dispose();
+                    await this.ReactError();
+                    await ReplyAsync("Computation took more than 2 minutes, cancelled. Sorry!");
+                    return;
+                }
+            }
             var took = (HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds;
             await this.ReactOk();
 
