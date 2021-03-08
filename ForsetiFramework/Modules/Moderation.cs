@@ -200,7 +200,7 @@ namespace ForsetiFramework.Modules
         [Syntax("kick <user>")]
         public async Task Kick(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
-            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
             reason = reason.EndsWith(".") ? reason : reason + ".";
             await user.KickAsync();
             await ModLogs.SendMessageAsync($"{user.Mention} was kicked by {Context.User}.");
@@ -214,7 +214,7 @@ namespace ForsetiFramework.Modules
         [Syntax("ban <user>")]
         public async Task Ban(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
-            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
             reason = reason.EndsWith(".") ? reason : reason + ".";
             await user.BanAsync(0, reason);
             await Context.Message.DeleteAsync();
@@ -228,7 +228,7 @@ namespace ForsetiFramework.Modules
         [Syntax("unban <user>")]
         public async Task Unban(ulong user)
         {
-            if (user == Context.Message.Author.Id) { await this.ReactError(); return; }
+            if (user == Context.Message.Author.Id) { await Context.ReactError(); return; }
             await Context.Guild.RemoveBanAsync(user);
             await ModLogs.SendMessageAsync($"{user} unbanned by {Context.User.Mention}.");
             await Context.Message.DeleteAsync();
@@ -240,7 +240,7 @@ namespace ForsetiFramework.Modules
         [Syntax("mute <user>")]
         public async Task Mute(SocketGuildUser user)
         {
-            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
             if (!user.Roles.Any(r => r.Name == "Muted"))
             {
                 await user.RemoveRoleAsync(Context.Guild.Roles.First(r => r.Name == "Member"));
@@ -257,7 +257,7 @@ namespace ForsetiFramework.Modules
         [Syntax("unmute <user>")]
         public async Task Unmute(SocketGuildUser user)
         {
-            if (user.Id == Context.Message.Author.Id || user.IsBot) { await this.ReactError(); return; }
+            if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
             if (user.Roles.Any(r => r.Name == "Muted"))
             {
                 await user.AddRoleAsync(Context.Guild.Roles.First(r => r.Name == "Member"));
@@ -276,7 +276,7 @@ namespace ForsetiFramework.Modules
         [Syntax("purge <count>")]
         public async Task Purge(int count)
         {
-            if (Context.Channel.Id == ModLogs.Id) { await this.ReactError(); return; }
+            if (Context.Channel.Id == ModLogs.Id) { await Context.ReactError(); return; }
 
             var messages = await Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
             await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);

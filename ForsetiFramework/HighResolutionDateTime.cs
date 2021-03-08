@@ -20,9 +20,7 @@ namespace ForsetiFramework
                         "High resolution clock isn't available.");
                 }
 
-                long filetime;
-                GetSystemTimePreciseAsFileTime(out filetime);
-
+                GetSystemTimePreciseAsFileTime(out var filetime);
                 return DateTime.FromFileTimeUtc(filetime);
             }
         }
@@ -31,8 +29,7 @@ namespace ForsetiFramework
         {
             try
             {
-                long filetime;
-                GetSystemTimePreciseAsFileTime(out filetime);
+                GetSystemTimePreciseAsFileTime(out _);
                 IsAvailable = true;
             }
             catch (EntryPointNotFoundException)

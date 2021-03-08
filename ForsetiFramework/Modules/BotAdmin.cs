@@ -34,18 +34,20 @@ namespace ForsetiFramework.Modules
         [Summary("Restarts the bot.")]
         public async Task Restart(bool update = true)
         {
-            await this.ReactOk();
+            await Context.ReactOk();
             await BotManager.Client.StopAsync();
             Program.Icon.Visible = false;
 
             if (!Config.Debug)
             {
-                var p = new Process();
-                p.StartInfo = new ProcessStartInfo()
+                var p = new Process
                 {
-                    FileName = update ? "update.bat" : "restart.bat",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = update ? "update.bat" : "restart.bat",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
                 };
                 p.Start();
             }
@@ -105,7 +107,7 @@ namespace ForsetiFramework.Modules
         {
             if (n <= 0) { await ReplyAsync("No."); return; }
 
-            if (n == 1) { await ReplyAsync("0");  return; }
+            if (n == 1) { await ReplyAsync("0"); return; }
             if (n == 2) { await ReplyAsync("1"); return; }
 
             var typing = Context.Channel.EnterTypingState();
@@ -117,13 +119,13 @@ namespace ForsetiFramework.Modules
                 if ((HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds > 1000 * 60 * 5)
                 {
                     typing.Dispose();
-                    await this.ReactError();
+                    await Context.ReactError();
                     await ReplyAsync("Computation took more than 2 minutes, cancelled. Sorry!");
                     return;
                 }
             }
             var took = (HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds;
-            await this.ReactOk();
+            await Context.ReactOk();
 
             var s = b.ToString();
             var parts = await s.SplitWithLength(1950);

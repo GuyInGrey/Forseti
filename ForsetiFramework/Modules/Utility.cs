@@ -82,7 +82,7 @@ namespace ForsetiFramework.Modules
                         return;
                     }
                 }
-                await this.ReactError();
+                await Context.ReactError();
                 return;
             }
         }
@@ -166,13 +166,13 @@ namespace ForsetiFramework.Modules
             {
                 if (!await Tags.RemoveTag(name))
                 {
-                    await this.ReactError();
+                    await Context.ReactError();
                     return;
                 }
             }
             else
             {
-                if (name.Length > 255) { await this.ReactError(); return; }
+                if (name.Length > 255) { await Context.ReactError(); return; }
                 var t = new Tag()
                 {
                     Name = name.ToLower(),
@@ -181,7 +181,7 @@ namespace ForsetiFramework.Modules
                 };
                 await Tags.SetTag(t);
             }
-            await this.ReactOk();
+            await Context.ReactOk();
         }
 
         [Command("poll")]
@@ -191,8 +191,8 @@ namespace ForsetiFramework.Modules
         public async Task Poll([Remainder]string suffix)
         {
             var items = suffix.Split('\n');
-            if (items.Length < 3) { await this.ReactError(); return; }
-            if (items.Length > 10) { await this.ReactError(); return; }
+            if (items.Length < 3) { await Context.ReactError(); return; }
+            if (items.Length > 10) { await Context.ReactError(); return; }
             await Context.Message.DeleteAsync();
 
             // Most places don't render this right (including in Visual Studio), 
@@ -237,12 +237,12 @@ namespace ForsetiFramework.Modules
                             .AddField("Syntax", syntax)
                             .WithColor(Color.Blue);
 
-                        await this.ReactOk();
+                        await Context.ReactOk();
                         await Context.Message.Author.SendMessageAsync(embed: e.Build());
                         return;
                     }
                 }
-                await this.ReactError();
+                await Context.ReactError();
                 return;
             }
 
@@ -292,7 +292,7 @@ namespace ForsetiFramework.Modules
                 }
             }
 
-            await this.ReactOk();
+            await Context.ReactOk();
             foreach (var b in builders)
             {
                 _ = Context.Message.Author.SendMessageAsync(embed: b.Build());

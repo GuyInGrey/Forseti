@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
+using System.Windows.Input;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -14,14 +14,17 @@ namespace ForsetiFramework
 {
     public static class Extensions
     {
-        public static async Task ReactOk(this ModuleBase<SocketCommandContext> c) =>
-            await c.Context.Message.AddReactionAsync(new Emoji("👌"));
+        public static async Task ReactOk(this ICommandContext c) =>
+            await c.Message.AddReactionAsync(new Emoji("👌"));
 
-        public static async Task ReactError(this ModuleBase<SocketCommandContext> c) =>
-            await c.Context.Message.AddReactionAsync(new Emoji("❌"));
+        public static async Task ReactError(this ICommandContext c) =>
+            await c.Message.AddReactionAsync(new Emoji("❌"));
+
+        public static async Task ReactQuestion(this ICommandContext c) =>
+            await c.Message.AddReactionAsync(new Emoji("❓"));
 
         public static (string left, string right) SplitAt(this string s, int index) =>
-            (s.Substring(0, index), s.Substring(index, s.Length - index));
+            index == -1 ? (s, "") : (s.Substring(0, index), s.Substring(index, s.Length - index));
 
         public static int NonQuery(this string s, params object[] param)
         {
@@ -129,6 +132,16 @@ namespace ForsetiFramework
             var channel = BotManager.Client.GetChannel(channelId) as SocketGuildChannel;
             var message = await (channel as ITextChannel).GetMessageAsync(messageId);
             return (channel, message);
+        }
+
+        public static string GetCommand(this IUserMessage msg)
+        {
+            var argPos = 0;
+            var hasPrefix = msg.HasStringPrefix(Config.Prefix, ref argPos) || msg.HasMentionPrefix(BotManager.Client.CurrentUser, ref argPos);
+            if (!(hasPrefix) || msg.Author.IsBot) { return null; }
+
+            (_, var Remainder) = msg.Content.SplitAt(argPos);
+            return Remainder.Split(' ')[0];
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Discord;
@@ -38,7 +39,7 @@ namespace ForsetiFramework
             {
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async,
-                IgnoreExtraArgs = true,
+                IgnoreExtraArgs = false,
                 LogLevel = LogSeverity.Warning,
                 SeparatorChar = ' ',
                 ThrowOnError = false,
@@ -71,40 +72,27 @@ namespace ForsetiFramework
                 TypingStates.RemoveAll(t => t.Item1 == context.Message.Id);
             }
 
-            if (!(result.ErrorReason is null))
+            if (!result.IsSuccess)
             {
-                // If unknown command or no permission, react with ❓
-                if (result.ErrorReason == "Unknown command." 
-                    || result.ErrorReason.Contains("must have the role")
-                    || result.ErrorReason.Contains("owner of the bot."))
+                var ch = context.Channel;
+                var usr = context.Message.Author;
+
+                if (result.Error == CommandError.UnknownCommand || result.Error == CommandError.UnmetPrecondition)
                 {
-                    await context.Message.AddReactionAsync(new Emoji("❓"));
-                    return;
+                    await context.ReactQuestion();
                 }
-                else if (result.ErrorReason.ToLower().Contains("must be in a guild")
-                    || result.ErrorReason.Equals("User not found."))
+                else if (result.Error == CommandError.ParseFailed || 
+                    result.Error == CommandError.ObjectNotFound ||
+                    result.Error == CommandError.BadArgCount)
                 {
-                    await context.Message.Channel.SendMessageAsync(result.ErrorReason);
+                    var cmd = context.Message.GetCommand();
+                    await ch.SendMessageAsync($"Invalid, see `!help {cmd}`.");
                 }
-                else if (result.ErrorReason != null)
+                else
                 {
-                    await context.Message.Channel.SendMessageAsync("I've run into an error. I've let staff know.");
-                    //await context.Message.Channel.SendMessageAsync(result.ErrorReason);
+                    await ch.SendMessageAsync($"I've run into an error ({result.Error}). I've let staff know.");
                 }
             }
-
-            // Log that the command was run in #bot-command-log
-            var commandLog = Client.GetChannel(814970218555768882) as SocketTextChannel;
-            var msg = context.Message;
-
-            // e.g.
-            // ✅ [2/28/2021 5:37:04 PM +00:00] [GuyInGrey#4066] [#bot-testing]> $ping
-            var toSend = (result.IsSuccess ? "✅ " : "❌ ") +
-                $"[{DateTimeOffset.UtcNow}] " +
-                $"[{msg.Author.Username}#{msg.Author.Discriminator}] " +
-                $"<#{msg.Channel.Id}>> `{msg.Content}`";
-
-            //await commandLog.SendMessageAsync(toSend);
         }
 
         private static async Task HandleCommands(SocketMessage arg)
@@ -116,9 +104,8 @@ namespace ForsetiFramework
             var hasPrefix = msg.HasStringPrefix(Config.Prefix, ref argPos) || msg.HasMentionPrefix(Client.CurrentUser, ref argPos);
             if (!(hasPrefix) || msg.Author.IsBot) { return; }
 
-            (_, var Remainder) = msg.Content.SplitAt(argPos);
-            var commandName = Remainder.Split(' ')[0];
-            var suffix = string.Join(" ", Remainder.Split(' ').Skip(1));
+            var remainder = msg.Content.SplitAt(argPos).right;
+            (var commandName, var suffix) = remainder.SplitAt(remainder.IndexOf(' '));
 
             var tag = await Tags.GetTag(commandName);
             if (tag is null) // Normal command handling
