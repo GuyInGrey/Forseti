@@ -176,10 +176,10 @@
     <Compile Include="Modules\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequireProductionAttribute.cs" />
-    <Compile Include="RequireRoleAttribute.cs" />
-    <Compile Include="SyntaxAttribute.cs" />
-    <Compile Include="Typing.cs" />
+    <Compile Include="Attributes\RequireProductionAttribute.cs" />
+    <Compile Include="Attributes\RequireRoleAttribute.cs" />
+    <Compile Include="Attributes\SyntaxAttribute.cs" />
+    <Compile Include="Attributes\TypingAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
