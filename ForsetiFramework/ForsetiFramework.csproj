@@ -179,6 +179,7 @@
     <Compile Include="RequireProductionAttribute.cs" />
     <Compile Include="RequireRoleAttribute.cs" />
     <Compile Include="SyntaxAttribute.cs" />
+    <Compile Include="Typing.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

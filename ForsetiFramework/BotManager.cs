@@ -66,17 +66,11 @@ namespace ForsetiFramework
 
         private static async Task Commands_CommandExecuted(Optional<CommandInfo> arg1, ICommandContext context, IResult result)
         {
-            if (Config.DoTypingStatus)
-            {
-                TypingStates.Where(t => t.Item1 == context.Message.Id).ToList().ForEach(t => t.Item2.Dispose());
-                TypingStates.RemoveAll(t => t.Item1 == context.Message.Id);
-            }
+            TypingStates.Where(t => t.Item1 == context.Message.Id).ToList().ForEach(t => t.Item2.Dispose());
+            TypingStates.RemoveAll(t => t.Item1 == context.Message.Id);
 
             if (!result.IsSuccess)
             {
-                var ch = context.Channel;
-                var usr = context.Message.Author;
-
                 if (result.Error == CommandError.UnknownCommand || result.Error == CommandError.UnmetPrecondition)
                 {
                     await context.ReactQuestion();
@@ -86,11 +80,18 @@ namespace ForsetiFramework
                     result.Error == CommandError.BadArgCount)
                 {
                     var cmd = context.Message.GetCommand();
-                    await ch.SendMessageAsync($"Invalid, see `!help {cmd}`.");
+                    await context.Channel.SendMessageAsync($"Invalid, see `!help {cmd}`.");
                 }
                 else
                 {
-                    await ch.SendMessageAsync($"I've run into an error ({result.Error}). I've let staff know.");
+                    await context.Channel.SendMessageAsync($"I've run into an error ({result.Error}). I've let staff know.");
+                    var e = new EmbedBuilder()
+                        .WithTitle("Failed command.")
+                        .WithDescription($"`{context.Message.Content}` - {context.User.Username}#{context.User.Discriminator}")
+                        .AddField("Error", $"`{result.Error}`")
+                        .AddField("Error Reason", $"`{result.ErrorReason}`")
+                        .WithCurrentTimestamp();
+                    await Logger.ErrorsClient.SendMessageAsync(embeds: new[] { e.Build() });
                 }
             }
         }
@@ -110,11 +111,15 @@ namespace ForsetiFramework
             var tag = await Tags.GetTag(commandName);
             if (tag is null) // Normal command handling
             {
-                if (Config.DoTypingStatus)
-                {
-                    TypingStates.Add((msg.Id, msg.Channel.EnterTypingState()));
-                }
                 var context = new SocketCommandContext(Client, msg);
+                var cmd = Commands.Commands.FirstOrDefault(c => c.Name == commandName);
+                if (!(cmd is null))
+                {
+                    if (!(cmd.Attributes.FirstOrDefault(a => a is TypingAttribute) is null))
+                    {
+                        TypingStates.Add((msg.Id, msg.Channel.EnterTypingState()));
+                    }
+                }
                 await Commands.ExecuteAsync(context, argPos, null);
             }
             else // Tag command handling

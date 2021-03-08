@@ -13,7 +13,6 @@ namespace ForsetiFramework
 
         public static string Path => Debug ? @"C:\ForsetiDebug\" : @"C:\Forseti\";
         public static string Prefix => Debug ? "$" : "!";
-        public static bool DoTypingStatus => false;
 
         [JsonProperty("token")]
         public string Token;

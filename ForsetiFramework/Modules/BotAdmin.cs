@@ -103,6 +103,7 @@ namespace ForsetiFramework.Modules
         [Alias("fibonnaci")]
         [Syntax("fib <n>")]
         [RequireRole("staff")]
+        [Typing]
         public async Task Fib(int n)
         {
             if (n <= 0) { await ReplyAsync("No."); return; }
@@ -110,7 +111,7 @@ namespace ForsetiFramework.Modules
             if (n == 1) { await ReplyAsync("0"); return; }
             if (n == 2) { await ReplyAsync("1"); return; }
 
-            var typing = Context.Channel.EnterTypingState();
+            //var typing = Context.Channel.EnterTypingState();
 
             var startTime = HighResolutionDateTime.UtcNow;
             (var a, var b) = ((BigInteger)1, (BigInteger)1); for (var i = 0; i < n - 3; i++) 
@@ -118,7 +119,7 @@ namespace ForsetiFramework.Modules
                 b = a + b; a = b - a; 
                 if ((HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds > 1000 * 60 * 5)
                 {
-                    typing.Dispose();
+                    //typing.Dispose();
                     await Context.ReactError();
                     await ReplyAsync("Computation took more than 2 minutes, cancelled. Sorry!");
                     return;
@@ -134,7 +135,7 @@ namespace ForsetiFramework.Modules
             {
                 await ReplyAsync($"__Fibonacci Results__\nn = {n}\nTook {took} ms.\nfib(n) has {s.Length} digits.\n" +
                     $"Did not post due to requiring {parts.Count} messages.");
-                typing.Dispose();
+                //typing.Dispose();
                 return;
             }
 
@@ -144,7 +145,7 @@ namespace ForsetiFramework.Modules
             }
 
             await ReplyAsync($"__Fibonacci Results__\nn = {n}\nTook {took} ms.\nfib(n) has {s.Length} digits.");
-            typing.Dispose();
+            //typing.Dispose();
         }
     }
 }
