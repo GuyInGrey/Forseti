@@ -39,7 +39,7 @@ namespace ForsetiFramework.Modules
 
         public static async Task CheckMessage(SocketUserMessage m)
         {
-            if (m.Author.Id == BotManager.Client.CurrentUser.Id || m.Content is null) { return; }
+            if (m.Author.IsBot || m.Content is null) { return; }
             var guild = (m.Channel as SocketGuildChannel).Guild;
 
             var content = m.Content.Replace("`", " ").Replace("\n", " ");
@@ -269,12 +269,15 @@ namespace ForsetiFramework.Modules
         }
 
         [Command("purge")]
+        [Alias("clean")]
         [RequireRole("staff")]
         [RequireProduction]
         [Summary("Purges messages of specified amount in the current channel.")]
         [Syntax("purge <count>")]
         public async Task Purge(int count)
         {
+            if (Context.Channel.Id == ModLogs.Id) { await this.ReactError(); return; }
+
             var messages = await Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
             await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
             await ModLogs.SendMessageAsync($"{count} messages purged by {Context.User.Mention} in #{Context.Channel.Name}.");

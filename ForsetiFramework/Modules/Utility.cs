@@ -30,7 +30,8 @@ namespace ForsetiFramework.Modules
             if (context.Message.Author.Id != arg3.UserId) { return; }
 
             var embed = helpMenuMsg.Embeds.First();
-            var index = (await context.GetModules()).IndexOf((await context.GetModules()).FirstOrDefault(m => m.Name == embed.Title));
+            var index = (await context.GetModules()).Where(m => m.Parent is null).ToList()
+                .IndexOf((await context.GetModules()).FirstOrDefault(m => m.Name == embed.Title));
             var mod = arg3.Emote.Name == "⬅️" ? -1 : arg3.Emote.Name == "➡️" ? 1 : 0;
             await PostHelpEmbed(index + mod, context, helpMenuMsg);
         }
@@ -52,7 +53,7 @@ namespace ForsetiFramework.Modules
                 {
                     if (module.Name.ToLower() == cmd)
                     {
-                        var index = (await Context.GetModules()).IndexOf(module);
+                        var index = (await Context.GetModules()).Where(m => m.Parent is null).ToList().IndexOf(module);
                         await PostHelpEmbed(index, Context);
                         return;
                     }
@@ -66,7 +67,7 @@ namespace ForsetiFramework.Modules
                         var syntax = syntaxAtt is null ? "None" : $"`{syntaxAtt.Syntax}`";
 
                         var e = new EmbedBuilder()
-                            .WithTitle(Config.Prefix + c.Name.ToLower())
+                            .WithTitle(Config.Prefix + GetCommandString(c))
                             .WithCurrentTimestamp()
                             .WithDescription((c.Summary is null || c.Summary == "") ? "No Summary" : c.Summary)
                             .AddField("Syntax", syntax, true)
@@ -86,9 +87,25 @@ namespace ForsetiFramework.Modules
             }
         }
 
+        public static string GetCommandString(CommandInfo c)
+        {
+            var s = c.Name.ToLower();
+            var mod = c.Module;
+            while (!(mod is null))
+            {
+                if (!(mod.Group?.ToLower() is null || mod.Group?.ToLower() == ""))
+                {
+                    s = mod.Group.ToLower() + " " + s;
+                }
+                mod = mod.Parent;
+            }
+            return s;
+        }
+
         public static async Task PostHelpEmbed(int index, SocketCommandContext context, RestUserMessage toEdit = null)
         {
-            var modules = await context.GetModules();
+            var allModules = await context.GetModules();
+            var modules = allModules.Where(m => m.Parent is null).ToList();
 
             index = (index + modules.Count) % modules.Count;
             var module = modules[index];
@@ -110,7 +127,8 @@ namespace ForsetiFramework.Modules
                 .WithCurrentTimestamp()
                 .WithDescription(desc.Trim());
 
-            foreach (var command in module.Commands)
+            foreach (var command in allModules.SelectMany(m => m.Commands)
+                .Where(c => c.Module == module || (!(module.Group is null) && GetCommandString(c).StartsWith(module.Group.ToLower() + " "))))
             {
                 if (!(await command.CheckPreconditionsAsync(context)).IsSuccess) { continue; }
                 var syntaxAtt = (SyntaxAttribute)command.Attributes.FirstOrDefault(a => a is SyntaxAttribute);
@@ -120,7 +138,7 @@ namespace ForsetiFramework.Modules
                     $"{(command.Aliases.Count > 1 ? "Aliases: `" + string.Join("`, `", command.Aliases.Skip(1)) + "`" : "")}" +
                     $"{(command.Summary == "" ? "" : $"\n{command.Summary}")}";
                 sumString = sumString.Trim();
-                builder.AddField(Config.Prefix + command.Name.ToLower(), sumString == string.Empty ? ":)" : sumString, true);
+                builder.AddField(Config.Prefix + GetCommandString(command), sumString == string.Empty ? ":)" : sumString, true);
             }
 
             if (!(toEdit is null))

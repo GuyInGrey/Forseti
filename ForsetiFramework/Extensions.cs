@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Discord;
@@ -67,19 +68,32 @@ namespace ForsetiFramework
         public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)
         {
             var modules = BotManager.Commands.Modules.ToList();
-            modules.RemoveAll(m =>
+
+            var modulesToRemove = BotManager.Commands.Modules.ToList();
+            modulesToRemove.RemoveAll(m =>
             {
-                foreach (var cmd in m.Commands)
-                {
-                    if (cmd.CheckPreconditionsAsync(c).GetAwaiter().GetResult().IsSuccess)
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return !(m.IsAvailable(modules, c).GetAwaiter().GetResult());
             });
 
-            return modules;
+            return modulesToRemove;
+        }
+
+        public static async Task<bool> IsAvailable(this ModuleInfo m, List<ModuleInfo> modules, SocketCommandContext c)
+        {
+            foreach (var cmd in m.Commands)
+            {
+                if (cmd.CheckPreconditionsAsync(c).GetAwaiter().GetResult().IsSuccess)
+                {
+                    return true;
+                }
+            }
+
+            foreach (var child in modules.Where(m2 => m2.Parent == m))
+            {
+                if (await IsAvailable(child, modules, c)) { return true; }
+            }
+
+            return false;
         }
 
         public static async Task<List<string>> SplitWithLength(this string s, int length)
@@ -91,7 +105,12 @@ namespace ForsetiFramework
                 var index = s.Substring(0, length).LastIndexOf("\n");
                 if (index == -1)
                 {
-                    s = s.Insert(length / 2, "\n");
+                    s = s.Insert(length - 2, "\n");
+                    continue;
+                }
+                else if (index == 0)
+                {
+                    s = s.Insert(length - 2, "\n");
                     continue;
                 }
                 toReturn.Add(s.Substring(0, index));

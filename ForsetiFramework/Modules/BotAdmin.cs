@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Discord;
@@ -94,6 +95,44 @@ namespace ForsetiFramework.Modules
         {
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync(text);
+        }
+
+        [Command("fib")]
+        [Alias("fibonnaci")]
+        [Syntax("fib <n>")]
+        [RequireRole("staff")]
+        public async Task Fib(int n)
+        {
+            if (n <= 0) { await ReplyAsync("No."); return; }
+
+            if (n == 1) { await ReplyAsync("0");  return; }
+            if (n == 2) { await ReplyAsync("1"); return; }
+
+            var typing = Context.Channel.EnterTypingState();
+
+            var startTime = HighResolutionDateTime.UtcNow;
+            (var a, var b) = ((BigInteger)1, (BigInteger)1); for (var i = 0; i < n - 3; i++) { b = a + b; a = b - a; }
+            var took = (HighResolutionDateTime.UtcNow - startTime).TotalMilliseconds;
+            await this.ReactOk();
+
+            var s = b.ToString();
+            var parts = await s.SplitWithLength(1950);
+
+            if (parts.Count > 5)
+            {
+                await ReplyAsync($"__Fibonacci Results__\nn = {n}\nTook {took} ms.\nfib(n) has {s.Length} digits.\n" +
+                    $"Did not post due to requiring {parts.Count} messages.");
+                typing.Dispose();
+                return;
+            }
+
+            foreach (var p in parts)
+            {
+                await ReplyAsync("```\n" + p + "\n```");
+            }
+
+            await ReplyAsync($"__Fibonacci Results__\nn = {n}\nTook {took} ms.\nfib(n) has {s.Length} digits.");
+            typing.Dispose();
         }
     }
 }
