@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -28,6 +29,9 @@ namespace ForsetiFramework
 
         public static int NonQuery(this string s, params object[] param)
         {
+            if (s is null || s.Trim() == "") { return -1; }
+            Console.WriteLine("QUERY: " + s);
+
             try
             {
                 var cmd = new MySqlCommand(s, Database.Connection);
@@ -49,6 +53,7 @@ namespace ForsetiFramework
 
         public static MySqlDataReader Query(this string s, params object[] param)
         {
+            if (s is null || s.Trim() == "") { return null; }
             try
             {
                 var cmd = new MySqlCommand(s, Database.Connection);

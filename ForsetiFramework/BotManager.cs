@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 using Discord;
 using Discord.WebSocket;
@@ -46,6 +49,23 @@ namespace ForsetiFramework
         }
 
         private static async Task Client_Ready()
+        {
+            foreach (var t in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                RuntimeHelpers.RunClassConstructor(t.TypeHandle);
+
+                foreach (var m in t.GetMethods().Where(m2 => m2.IsStatic))
+                {
+                    if (!(m.GetCustomAttribute<OnReadyAttribute>() is null))
+                    {
+                        m?.Invoke(null, null);
+                    }
+                }
+            }
+        }
+
+        [OnReady]
+        public static async Task OnReady()
         {
             if (Config.Debug) { return; } // Don't post debug ready messages
             var botTesting = Client.GetChannel(814330280969895936) as SocketTextChannel;

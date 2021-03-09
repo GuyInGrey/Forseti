@@ -3,5 +3,5 @@
 namespace ForsetiFramework
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class TypingAttribute : Attribute { }
+    public class OnReadyAttribute : Attribute { }
 }

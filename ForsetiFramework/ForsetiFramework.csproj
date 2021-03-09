@@ -162,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ClockworkAttribute.cs" />
+    <Compile Include="Attributes\OnReadyAttribute.cs" />
     <Compile Include="BotManager.cs" />
     <Compile Include="ClockworkManager.cs" />
     <Compile Include="CommandManager.cs" />

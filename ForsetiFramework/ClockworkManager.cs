@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Timers;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace ForsetiFramework
 {
@@ -18,7 +19,7 @@ namespace ForsetiFramework
             {
                 RuntimeHelpers.RunClassConstructor(t.TypeHandle);
 
-                foreach (var m in t.GetMethods())
+                foreach (var m in t.GetMethods().Where(m2 => m2.IsStatic))
                 {
                     foreach (var a in m.GetCustomAttributes<ClockworkAttribute>())
                     {

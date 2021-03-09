@@ -28,6 +28,8 @@ namespace ForsetiFramework.Modules
 
         public static void ForceReconnect()
         {
+            Console.WriteLine("Database Reconnect");
+
             if (Connection.State == ConnectionState.Open || Connection.State == ConnectionState.Executing || Connection.State == ConnectionState.Fetching)
             {
                 try
