@@ -14,12 +14,8 @@ namespace ForsetiFramework.Modules
         static Dictionary<ulong, (SocketCommandContext context, RestUserMessage helpMenuMsg)> HelpMenus =
             new Dictionary<ulong, (SocketCommandContext, RestUserMessage)>();
 
-        static Utility()
-        {
-            BotManager.Client.ReactionAdded += Client_ReactionAdded;
-        }
-
-        private static async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        [Event(Events.ReactionAdded)]
+        public static async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             if (arg3.UserId == BotManager.Client.CurrentUser.Id) { return; }
             if (!(HelpMenus.ContainsKey(arg1.Id))) { return; }

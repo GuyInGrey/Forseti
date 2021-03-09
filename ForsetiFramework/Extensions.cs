@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Discord;
@@ -147,5 +149,14 @@ namespace ForsetiFramework
         }
 
         public static string NameDesc(this IUser usr) => usr.Username + "#" + usr.Discriminator;
+
+        public static bool HasAttribute<T>(this MemberInfo e) where T : Attribute =>
+            !(e.GetCustomAttribute<T>() is null);
+
+        public static bool HasAttribute<T>(this MemberInfo e, out T att) where T : Attribute
+        {
+            att = e.GetCustomAttribute<T>();
+            return !(att is null);
+        }
     }
 }

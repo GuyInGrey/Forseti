@@ -162,6 +162,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ClockworkAttribute.cs" />
+    <Compile Include="Attributes\EventAttribute.cs" />
+    <Compile Include="Attributes\Events.cs" />
+    <Compile Include="Modules\ModerationEvents.cs" />
     <Compile Include="Attributes\OnReadyAttribute.cs" />
     <Compile Include="BotManager.cs" />
     <Compile Include="ClockworkManager.cs" />

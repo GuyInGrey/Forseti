@@ -7,29 +7,28 @@ namespace ForsetiFramework.Modules
 {
     public class PersistentRoles
     {
+        public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
+
         [OnReady]
         public static void Init()
         {
-
             @"CREATE TABLE IF NOT EXISTS `forseti`.`persistentroles` (
   `userID` BIGINT(18) NOT NULL,
   `roles` TEXT NULL,
   PRIMARY KEY (`userID`),
   UNIQUE INDEX `userID_UNIQUE` (`userID` ASC) VISIBLE);".NonQuery();
-
-            BotManager.Client.UserJoined += Client_UserJoined;
-            BotManager.Client.GuildMemberUpdated += Client_UserUpdated;
         }
-        public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
 
-        private static async Task Client_UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
+        [Event(Events.GuildMemberUpdated)]
+        public static void UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {
             var roleString = string.Join(",", arg2.Roles.Where(r => !r.Name.Contains("everyone")).Select(r => r.Id));
             "DELETE FROM `forseti`.`persistentroles` WHERE userID=@p0;".NonQuery(arg2.Id.ToString());
             "INSERT INTO `forseti`.`persistentroles` (userID, roles) VALUES (@p0, @p1);".NonQuery(arg2.Id.ToString(), roleString);
         }
 
-        private static async Task Client_UserJoined(SocketGuildUser arg)
+        [Event(Events.UserJoined)]
+        public static async Task UserJoined(SocketGuildUser arg)
         {
             var guild = BotManager.Client.GetGuild(769057370646511628);
 
