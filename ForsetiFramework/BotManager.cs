@@ -34,6 +34,7 @@ namespace ForsetiFramework
             Client.Log += Logger.Client_Log;
             Client.MessageReceived += CommandManager.HandleCommands;
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             Client.ChannelCreated += async (a) => DiscordEvent("ChannelCreated", a);
             Client.ChannelDestroyed += async (a) => DiscordEvent("ChannelDestroyed", a);
             Client.ChannelUpdated += async (a, b) => DiscordEvent("ChannelUpdated", a, b);
@@ -75,6 +76,7 @@ namespace ForsetiFramework
             Client.UserUpdated += async (a, b) => DiscordEvent("UserUpdated", a, b);
             Client.UserVoiceStateUpdated += async (a, b, c) => DiscordEvent("UserVoiceStateUpdated", a, b, c);
             Client.VoiceServerUpdated += async (a) => DiscordEvent("VoiceServerUpdated", a);
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         }
 
         public static async Task Start()
@@ -89,7 +91,7 @@ namespace ForsetiFramework
         }
 
         [Event(Events.Ready)]
-        public static async Task OnReady()
+        public static void OnReady()
         {
             Console.WriteLine("Ready");
         }
