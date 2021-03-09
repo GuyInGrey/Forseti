@@ -9,7 +9,7 @@ namespace ForsetiFramework.Modules
     {
         public static MySqlConnection Connection;
 
-        public static void Initialize() { }
+        public static void Init() { }
         static Database()
         {
             Connection = new MySqlConnection(BotManager.Config.DatabaseConnectionString);

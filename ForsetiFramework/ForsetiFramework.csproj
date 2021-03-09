@@ -161,7 +161,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\ClockworkAttribute.cs" />
     <Compile Include="BotManager.cs" />
+    <Compile Include="ClockworkManager.cs" />
+    <Compile Include="CommandManager.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="HighResolutionDateTime.cs" />

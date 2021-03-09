@@ -70,9 +70,9 @@ namespace ForsetiFramework
 
         public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)
         {
-            var modules = BotManager.Commands.Modules.ToList();
+            var modules = CommandManager.Commands.Modules.ToList();
 
-            var modulesToRemove = BotManager.Commands.Modules.ToList();
+            var modulesToRemove = CommandManager.Commands.Modules.ToList();
             modulesToRemove.RemoveAll(m =>
             {
                 return !(m.IsAvailable(modules, c).GetAwaiter().GetResult());
@@ -143,5 +143,7 @@ namespace ForsetiFramework
             (_, var Remainder) = msg.Content.SplitAt(argPos);
             return Remainder.Split(' ')[0];
         }
+
+        public static string NameDesc(this IUser usr) => usr.Username + "#" + usr.Discriminator;
     }
 }

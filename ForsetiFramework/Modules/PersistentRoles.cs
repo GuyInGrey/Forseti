@@ -7,7 +7,7 @@ namespace ForsetiFramework.Modules
 {
     public class PersistentRoles
     {
-        public static void Initialize() { }
+        public static void Init() { }
         public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
 
         static PersistentRoles()

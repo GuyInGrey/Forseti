@@ -34,6 +34,8 @@ namespace ForsetiFramework.Modules
 
                 BotManager.Client.ReactionAdded += Client_ReactionAdded;
                 BotManager.Client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
+                BotManager.Client.GuildMemberUpdated += Client_GuildMemberUpdated;
+                BotManager.Client.UserUpdated += Client_UserUpdated;
             }
         }
 
@@ -101,6 +103,30 @@ namespace ForsetiFramework.Modules
                 .AddField("Channel", $"<#{arg2.Id}>", true);
 
             await ModLogs.SendMessageAsync(embed: e.Build());
+        }
+
+        private static async Task Client_UserUpdated(SocketUser arg1, SocketUser arg2)
+        {
+            if (arg1.NameDesc() != arg2.NameDesc())
+            {
+                await ModLogs.SendMessageAsync($"Username changed for {arg1.NameDesc()} -> {arg2.NameDesc()} ({arg2.Id})");
+            }
+            if (arg1.AvatarId != arg2.AvatarId)
+            {
+                var url = arg2.GetAvatarUrl();
+                url = url == "" ? "`None`" : $"\n{url}";
+                await ModLogs.SendMessageAsync($"Avatar changed for {arg2.NameDesc()}: ({arg2.Id}) {url}");
+            }
+        }
+
+        private static async Task Client_GuildMemberUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
+        {
+            if (arg1.Nickname != arg2.Nickname)
+            {
+                var nick1 = arg1.Nickname == "" ? "`None`" : arg1.Nickname;
+                var nick2 = arg2.Nickname == "" ? "`None`" : arg2.Nickname;
+                await ModLogs.SendMessageAsync($"Nickname changed for {arg2.NameDesc()}: {nick1} -> {nick2} ({arg2.Id})");
+            }
         }
 
         private static async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> cMsg, ISocketMessageChannel ch, SocketReaction r)
