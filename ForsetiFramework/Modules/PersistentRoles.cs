@@ -7,11 +7,10 @@ namespace ForsetiFramework.Modules
 {
     public class PersistentRoles
     {
-        public static void Init() { }
-        public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
-
-        static PersistentRoles()
+        [OnReady]
+        public static void Init()
         {
+
             @"CREATE TABLE IF NOT EXISTS `forseti`.`persistentroles` (
   `userID` BIGINT(18) NOT NULL,
   `roles` TEXT NULL,
@@ -21,6 +20,7 @@ namespace ForsetiFramework.Modules
             BotManager.Client.UserJoined += Client_UserJoined;
             BotManager.Client.GuildMemberUpdated += Client_UserUpdated;
         }
+        public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
 
         private static async Task Client_UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {

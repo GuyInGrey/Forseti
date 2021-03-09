@@ -11,6 +11,7 @@ namespace ForsetiFramework
     {
         public static List<(Timer, MethodInfo)> Running;
 
+        [OnReady]
         public static void Init()
         {
             Running = new List<(Timer, MethodInfo)>();

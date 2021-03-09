@@ -41,7 +41,7 @@ namespace ForsetiFramework
             if (arg.Exception.Message.Equals("WebSocket connection was closed")) { return; }
 
             var color = arg.Severity == LogSeverity.Critical ? Color.Red : Color.Orange;
-            var stackParts = await (arg.Exception.InnerException?.StackTrace ?? arg.Exception.StackTrace).SplitWithLength(1000);
+            var stackParts = (arg.Exception.InnerException?.StackTrace ?? arg.Exception.StackTrace).SplitWithLength(1000);
             var e = new EmbedBuilder()
                     .WithColor(color)
                     .WithCurrentTimestamp();

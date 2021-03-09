@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -127,7 +128,7 @@ namespace ForsetiFramework.Modules
             await Context.ReactOk();
 
             var s = b.ToString();
-            var parts = await s.SplitWithLength(1950);
+            var parts = s.SplitWithLength(1950);
 
             if (parts.Count > 5)
             {

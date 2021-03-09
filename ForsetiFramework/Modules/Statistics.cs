@@ -6,10 +6,10 @@ namespace ForsetiFramework.Modules
 {
     public class Statistics : ModuleBase<SocketCommandContext>
     {
-        [Clockwork(1)]
+        [Clockwork(60 * 60 * 1000)]
         public static async Task Hourly()
         {
-            "".NonQuery();
+            Console.WriteLine(DateTime.Now + " : Test");
         }
     }
 }

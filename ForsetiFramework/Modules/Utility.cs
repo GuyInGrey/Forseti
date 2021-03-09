@@ -30,8 +30,8 @@ namespace ForsetiFramework.Modules
             if (context.Message.Author.Id != arg3.UserId) { return; }
 
             var embed = helpMenuMsg.Embeds.First();
-            var index = (await context.GetModules()).Where(m => m.Parent is null).ToList()
-                .IndexOf((await context.GetModules()).FirstOrDefault(m => m.Name == embed.Title));
+            var index = context.GetModules().Where(m => m.Parent is null).ToList()
+                .IndexOf(context.GetModules().FirstOrDefault(m => m.Name == embed.Title));
             var mod = arg3.Emote.Name == "⬅️" ? -1 : arg3.Emote.Name == "➡️" ? 1 : 0;
             await PostHelpEmbed(index + mod, context, helpMenuMsg);
         }
@@ -49,11 +49,11 @@ namespace ForsetiFramework.Modules
             }
             else
             {
-                foreach (var module in await Context.GetModules())
+                foreach (var module in Context.GetModules())
                 {
                     if (module.Name.ToLower() == cmd)
                     {
-                        var index = (await Context.GetModules()).Where(m => m.Parent is null).ToList().IndexOf(module);
+                        var index = Context.GetModules().Where(m => m.Parent is null).ToList().IndexOf(module);
                         await PostHelpEmbed(index, Context);
                         return;
                     }
@@ -104,7 +104,7 @@ namespace ForsetiFramework.Modules
 
         public static async Task PostHelpEmbed(int index, SocketCommandContext context, RestUserMessage toEdit = null)
         {
-            var allModules = await context.GetModules();
+            var allModules = context.GetModules();
             var modules = allModules.Where(m => m.Parent is null).ToList();
 
             index = (index + modules.Count) % modules.Count;

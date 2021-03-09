@@ -38,8 +38,6 @@ namespace ForsetiFramework
         public static async Task Start()
         {
             Database.Init();
-            PersistentRoles.Init();
-            ClockworkManager.Init();
 
             await Client.LoginAsync(TokenType.Bot, Config.Token);
             await Client.StartAsync();

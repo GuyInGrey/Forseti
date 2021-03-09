@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using System.Windows.Input;
+
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using ForsetiFramework.Modules;
 
 using MySql.Data.MySqlClient;
@@ -30,8 +29,6 @@ namespace ForsetiFramework
         public static int NonQuery(this string s, params object[] param)
         {
             if (s is null || s.Trim() == "") { return -1; }
-            Console.WriteLine("QUERY: " + s);
-
             try
             {
                 var cmd = new MySqlCommand(s, Database.Connection);
@@ -73,7 +70,7 @@ namespace ForsetiFramework
             }
         }
 
-        public static async Task<List<ModuleInfo>> GetModules(this SocketCommandContext c)
+        public static List<ModuleInfo> GetModules(this SocketCommandContext c)
         {
             var modules = CommandManager.Commands.Modules.ToList();
 
@@ -104,7 +101,7 @@ namespace ForsetiFramework
             return false;
         }
 
-        public static async Task<List<string>> SplitWithLength(this string s, int length)
+        public static List<string> SplitWithLength(this string s, int length)
         {
             var toReturn = new List<string>();
 
