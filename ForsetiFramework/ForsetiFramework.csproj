@@ -169,12 +169,12 @@
     <Compile Include="Attributes\Events.cs" />
     <Compile Include="Constructs\Quote.cs" />
     <Compile Include="Eval\Eval.cs" />
-    <Fakes Include="Eval\TemplateGet.cs">
+    <None Include="Eval\TemplateGet.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Fakes>
-    <Fakes Include="Eval\TemplatePost.cs">
+    </None>
+    <None Include="Eval\TemplatePost.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Fakes>
+    </None>
     <Compile Include="Modules\ModerationEvents.cs" />
     <Compile Include="Attributes\OnReadyAttribute.cs" />
     <Compile Include="BotManager.cs" />
