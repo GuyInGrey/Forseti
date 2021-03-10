@@ -33,6 +33,7 @@ namespace ForsetiFramework
             });
             Client.Log += Logger.Client_Log;
             Client.MessageReceived += CommandManager.HandleCommands;
+            Client.MessageUpdated += async (a, b, c) => await CommandManager.HandleCommands(b);
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             Client.ChannelCreated += async (a) => DiscordEvent("ChannelCreated", a);

@@ -8,7 +8,7 @@ using Discord.Commands;
 
 namespace ForsetiFramework.Modules
 {
-    [Group("statistics")]
+    [Group("Statistics")]
     [Alias("stats")]
     public class Statistics : ModuleBase<SocketCommandContext>
     {
