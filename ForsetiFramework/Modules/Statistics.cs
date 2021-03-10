@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace ForsetiFramework.Modules
         }
 
         [Command("pulse")]
+        [RequireRole("staff")]
         public async Task Pulse()
         {
             var q = "SELECT COUNT(*) FROM `forseti`.`commandhistory` WHERE time > @p0;"
@@ -50,6 +52,38 @@ namespace ForsetiFramework.Modules
             await ReplyAsync(embed: e.Build());
         }
 
+        [Command("commands")]
+        [RequireRole("staff")]
+        public async Task Commands()
+        {
+            var counts = new Dictionary<string, int>();
+            var q = "SELECT * FROM `forseti`.`commandhistory` WHERE debug=0;".Query();
+            while (q.Read())
+            {
+                if (!counts.ContainsKey(q["commandName"].ToString()))
+                {
+                    counts.Add(q["commandName"].ToString(), 0);
+                }
+                counts[q["commandName"].ToString()]++;
+            }
+            q.Dispose();
+            var total = counts.Select(c => c.Value).Sum();
+
+            var ordered = counts.Select(s => (s.Key, (s.Value / (double)total) * 100)).OrderBy(c => c.Item2).Reverse();
+            var lines = ordered.Select(o => $"{o.Item2:0.00} - `{o.Key}`");
+            var desc = string.Join("\n", lines);
+
+            var e = new EmbedBuilder()
+                .WithCurrentTimestamp()
+                .WithColor(Color.Green)
+                .WithTitle("Command Statistics")
+                .WithThumbnailUrl(BotManager.Client.CurrentUser.GetAvatarUrl())
+                .WithDescription(desc)
+                .WithFooter("Total Commands Ran: " + total);
+
+            await ReplyAsync(embed: e.Build());
+        }
+
         [Event(Events.Ready)]
         public static void Init()
         {
@@ -62,12 +96,12 @@ namespace ForsetiFramework.Modules
         }
 
         [Event(Events.CommandExecuted)]
-        [RequireProduction]
+        [RequireRole("staff")]
         public static void CommandExecuted(Optional<CommandInfo> cmd, ICommandContext context, IResult r)
         {
             if (!cmd.IsSpecified) { return; }
-            "INSERT INTO `forseti`.`commandhistory` (time, commandName, success, channel, error) values (@p0, @p1, @p2, @p3, @p4);"
-                .NonQuery(DateTime.Now, cmd.Value.Name, r.IsSuccess, context.Channel.Id, r.Error.ToString());
+            "INSERT INTO `forseti`.`commandhistory` (time, commandName, success, channel, error, debug) values (@p0, @p1, @p2, @p3, @p4, @p5);"
+                .NonQuery(DateTime.Now, cmd.Value.GetCommandString(), r.IsSuccess, context.Channel.Id, r.Error.ToString(), Config.Debug);
         }
     }
 }

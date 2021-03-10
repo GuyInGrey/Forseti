@@ -157,5 +157,20 @@ namespace ForsetiFramework
             att = e.GetCustomAttribute<T>();
             return !(att is null);
         }
+
+        public static string GetCommandString(this CommandInfo c)
+        {
+            var s = c.Name.ToLower();
+            var mod = c.Module;
+            while (!(mod is null))
+            {
+                if (!(mod.Group?.ToLower() is null || mod.Group?.ToLower() == ""))
+                {
+                    s = mod.Group.ToLower() + " " + s;
+                }
+                mod = mod.Parent;
+            }
+            return s;
+        }
     }
 }

@@ -63,7 +63,7 @@ namespace ForsetiFramework.Modules
                         var syntax = syntaxAtt is null ? "None" : $"`{syntaxAtt.Syntax}`";
 
                         var e = new EmbedBuilder()
-                            .WithTitle(Config.Prefix + GetCommandString(c))
+                            .WithTitle(Config.Prefix + c.GetCommandString())
                             .WithCurrentTimestamp()
                             .WithDescription((c.Summary is null || c.Summary == "") ? "No Summary" : c.Summary)
                             .AddField("Syntax", syntax, true)
@@ -81,21 +81,6 @@ namespace ForsetiFramework.Modules
                 await Context.ReactError();
                 return;
             }
-        }
-
-        public static string GetCommandString(CommandInfo c)
-        {
-            var s = c.Name.ToLower();
-            var mod = c.Module;
-            while (!(mod is null))
-            {
-                if (!(mod.Group?.ToLower() is null || mod.Group?.ToLower() == ""))
-                {
-                    s = mod.Group.ToLower() + " " + s;
-                }
-                mod = mod.Parent;
-            }
-            return s;
         }
 
         public static async Task PostHelpEmbed(int index, SocketCommandContext context, RestUserMessage toEdit = null)
@@ -124,7 +109,7 @@ namespace ForsetiFramework.Modules
                 .WithDescription(desc.Trim());
 
             foreach (var command in allModules.SelectMany(m => m.Commands)
-                .Where(c => c.Module == module || (!(module.Group is null) && GetCommandString(c).StartsWith(module.Group.ToLower() + " "))))
+                .Where(c => c.Module == module || (!(module.Group is null) && c.GetCommandString().StartsWith(module.Group.ToLower() + " "))))
             {
                 if (!(await command.CheckPreconditionsAsync(context)).IsSuccess) { continue; }
                 var syntaxAtt = (SyntaxAttribute)command.Attributes.FirstOrDefault(a => a is SyntaxAttribute);
@@ -134,7 +119,7 @@ namespace ForsetiFramework.Modules
                     $"{(command.Aliases.Count > 1 ? "Aliases: `" + string.Join("`, `", command.Aliases.Skip(1)) + "`" : "")}" +
                     $"{(command.Summary == "" ? "" : $"\n{command.Summary}")}";
                 sumString = sumString.Trim();
-                builder.AddField(Config.Prefix + GetCommandString(command), sumString == string.Empty ? ":)" : sumString, true);
+                builder.AddField(Config.Prefix + command.GetCommandString(), sumString == string.Empty ? ":)" : sumString, true);
             }
 
             if (!(toEdit is null))
