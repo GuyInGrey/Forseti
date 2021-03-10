@@ -20,32 +20,26 @@ namespace ForsetiFramework.Modules
         // User Info, This Is Fine, Warn & Delete, Mute & Delete
         static Emoji[] CardReactions = new[] { "👤", "✅", "⚠", "🔇" }.Select(s => new Emoji(s)).ToArray();
 
-        [Event(Events.MessageReceived)]
-        [RequireProduction]
+        [Event(Events.MessageReceived), RequireProduction]
         public static async Task MessageReceived(SocketMessage msg) { if (msg is SocketUserMessage msg2) { await CheckMessage(msg2); } }
 
-        [Event(Events.MessageUpdated)]
-        [RequireProduction]
+        [Event(Events.MessageUpdated), RequireProduction]
         public static async Task MessageUpdated(Cacheable<IMessage, ulong> a, SocketMessage msg, ISocketMessageChannel c)
         { if (msg is SocketUserMessage msg2) { await CheckMessage(msg2); } }
 
-        [Event(Events.UserLeft)]
-        [RequireProduction]
+        [Event(Events.UserLeft), RequireProduction]
         public static async Task UserLeft(SocketGuildUser usr) =>
             await Moderation.ModLogs.SendMessageAsync($"{usr.Mention} has left or was kicked.");
 
-        [Event(Events.UserBanned)]
-        [RequireProduction]
+        [Event(Events.UserBanned), RequireProduction]
         public static async Task UserBanned(SocketUser usr, SocketGuild guild) =>
             await Moderation.ModLogs.SendMessageAsync($"{usr.Mention} ({usr.Id}) has been banned.");
 
-        [Event(Events.UserUnbanned)]
-        [RequireProduction]
+        [Event(Events.UserUnbanned), RequireProduction]
         public static async Task UserUnbanned(SocketUser usr, SocketGuild guild) =>
             await Moderation.ModLogs.SendMessageAsync($"{usr.Mention} ({usr.Id}) has been unbanned.");
 
-        [Event(Events.MessagesBulkDeleted)]
-        [RequireProduction]
+        [Event(Events.MessagesBulkDeleted), RequireProduction]
         public static async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> arg1, ISocketMessageChannel arg2)
         {
             var e = new EmbedBuilder()
@@ -57,8 +51,7 @@ namespace ForsetiFramework.Modules
             await Moderation.ModLogs.SendMessageAsync(embed: e.Build());
         }
 
-        [Event(Events.UserUpdated)]
-        [RequireProduction]
+        [Event(Events.UserUpdated), RequireProduction]
         public static async Task UserUpdated(SocketUser arg1, SocketUser arg2)
         {
             if (arg1.NameDesc() != arg2.NameDesc())
@@ -73,8 +66,7 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Event(Events.GuildMemberUpdated)]
-        [RequireProduction]
+        [Event(Events.GuildMemberUpdated), RequireProduction]
         public static async Task GuildMemberUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {
             if (arg1.Nickname != arg2.Nickname)
@@ -85,8 +77,7 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Event(Events.ReactionAdded)]
-        [RequireProduction]
+        [Event(Events.ReactionAdded), RequireProduction]
         public static async Task ReactionAdded(Cacheable<IUserMessage, ulong> cMsg, ISocketMessageChannel ch, SocketReaction r)
         {
             if (r.User.Value.IsBot || ch.Id != Moderation.ModLogs.Id) { return; } // Ignore bot reactions, make sure reaction was in mod-logs

@@ -9,8 +9,7 @@ using Discord.Commands;
 
 namespace ForsetiFramework.Modules
 {
-    [Group("Statistics")]
-    [Alias("stats")]
+    [Group("Statistics"), Alias("stats")]
     public class Statistics : ModuleBase<SocketCommandContext>
     {
         [Clockwork(60 * 60 * 1000)]
@@ -19,8 +18,7 @@ namespace ForsetiFramework.Modules
             Console.WriteLine(DateTime.Now + " : Test");
         }
 
-        [Command("pulse")]
-        [RequireRole("staff")]
+        [Command("pulse"), RequireRole("staff")]
         public async Task Pulse()
         {
             var q = "SELECT COUNT(*) FROM `forseti`.`commandhistory` WHERE time > @p0;"
@@ -53,8 +51,7 @@ namespace ForsetiFramework.Modules
             await ReplyAsync(embed: e.Build());
         }
 
-        [Command("commands")]
-        [RequireRole("staff")]
+        [Command("commands"), Alias("cmds"), RequireRole("staff")]
         public async Task Commands()
         {
             var counts = new Dictionary<string, int>();
@@ -94,8 +91,7 @@ namespace ForsetiFramework.Modules
   `error` VARCHAR(150) NULL);".NonQuery();
         }
 
-        [Event(Events.CommandExecuted)]
-        [RequireRole("staff")]
+        [Event(Events.CommandExecuted), RequireRole("staff")]
         public static void CommandExecuted(Optional<CommandInfo> cmd, ICommandContext context, IResult r)
         {
             if (!cmd.IsSpecified) { return; }

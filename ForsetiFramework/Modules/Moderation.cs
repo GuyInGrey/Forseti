@@ -15,10 +15,7 @@ namespace ForsetiFramework.Modules
     {
         public static SocketTextChannel ModLogs => BotManager.Client.GetChannel(814327531216961616) as SocketTextChannel;
 
-        [Command("kick")]
-        [RequireRole("staff")]
-        [RequireProduction]
-        [Syntax("kick <user>")]
+        [Command("kick"), RequireRole("staff"), Syntax("kick <user>"), RequireProduction]
         public async Task Kick(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
             if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
@@ -29,10 +26,7 @@ namespace ForsetiFramework.Modules
             await user.SendMessageAsync($"You have been kicked from {Context.Guild.Name} for {reason}.");
         }
 
-        [Command("ban")]
-        [RequireRole("staff")]
-        [RequireProduction]
-        [Syntax("ban <user>")]
+        [Command("ban"), RequireRole("staff"), Syntax("ban <user>"), RequireProduction]
         public async Task Ban(SocketGuildUser user, [Remainder]string reason = "violating the rules")
         {
             if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
@@ -42,11 +36,7 @@ namespace ForsetiFramework.Modules
             await user.SendMessageAsync($"You have been banned from {Context.Guild.Name} for {reason}");
         }
 
-        [Command("unban")]
-        [Alias("pardon")]
-        [RequireRole("staff")]
-        [RequireProduction]
-        [Syntax("unban <user>")]
+        [Command("unban"), Alias("pardon"), RequireRole("staff"), Syntax("unban <user>"), RequireProduction]
         public async Task Unban(ulong user)
         {
             if (user == Context.Message.Author.Id) { await Context.ReactError(); return; }
@@ -55,10 +45,7 @@ namespace ForsetiFramework.Modules
             await Context.Message.DeleteAsync();
         }
 
-        [Command("mute")]
-        [RequireRole("staff")]
-        [RequireProduction]
-        [Syntax("mute <user>")]
+        [Command("mute"), RequireRole("staff"), Syntax("mute <user>"), RequireProduction]
         public async Task Mute(SocketGuildUser user)
         {
             if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
@@ -72,10 +59,7 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Command("unmute")]
-        [RequireRole("staff")]
-        [RequireProduction]
-        [Syntax("unmute <user>")]
+        [Command("unmute"), RequireRole("staff"), Syntax("unmute <user>"), RequireProduction]
         public async Task Unmute(SocketGuildUser user)
         {
             if (user.Id == Context.Message.Author.Id || user.IsBot) { await Context.ReactError(); return; }
@@ -89,12 +73,8 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Command("purge")]
-        [Alias("clean")]
-        [RequireRole("staff")]
-        [RequireProduction]
+        [Command("purge"), Alias("clean"), RequireRole("staff"), Syntax("purge <count>"), RequireProduction]
         [Summary("Purges messages of specified amount in the current channel.")]
-        [Syntax("purge <count>")]
         public async Task Purge(int count)
         {
             if (Context.Channel.Id == ModLogs.Id) { await Context.ReactError(); return; }

@@ -25,18 +25,14 @@ namespace ForsetiFramework.Modules
             await channel.SendMessageAsync(embed: e.Build());
         }
 
-        [Command("info")]
-        [Summary("Gets info about a given user.")]
-        [Syntax("info [user]")]
+        [Command("info"), Summary("Gets info about a given user."), Syntax("info [user]")]
         public async Task Info(SocketGuildUser usr = null)
         {
             usr = usr is null ? Context.Message.Author as SocketGuildUser : usr;
             await PostUserInfo(usr, Context.Channel as SocketTextChannel);
         }
 
-        [Command("avatar")]
-        [Summary("Get a user's avatar.")]
-        [Syntax("avatar [user]")]
+        [Command("avatar"), Summary("Get a user's avatar."), Syntax("avatar [user]")]
         public async Task Avatar(SocketGuildUser usr = null)
         {
             usr = usr is null ? Context.Message.Author as SocketGuildUser : usr;

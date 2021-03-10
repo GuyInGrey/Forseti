@@ -19,8 +19,7 @@ namespace ForsetiFramework.Modules
   UNIQUE INDEX `userID_UNIQUE` (`userID` ASC) VISIBLE);".NonQuery();
         }
 
-        [Event(Events.GuildMemberUpdated)]
-        [RequireProduction]
+        [Event(Events.GuildMemberUpdated), RequireProduction]
         public static void UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {
             var roleString = string.Join(",", arg2.Roles.Where(r => !r.Name.Contains("everyone")).Select(r => r.Id));
@@ -28,8 +27,7 @@ namespace ForsetiFramework.Modules
             "INSERT INTO `forseti`.`persistentroles` (userID, roles) VALUES (@p0, @p1);".NonQuery(arg2.Id.ToString(), roleString);
         }
 
-        [Event(Events.UserJoined)]
-        [RequireProduction]
+        [Event(Events.UserJoined), RequireProduction]
         public static async Task UserJoined(SocketGuildUser arg)
         {
             var guild = BotManager.Client.GetGuild(769057370646511628);

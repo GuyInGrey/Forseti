@@ -30,8 +30,7 @@ namespace ForsetiFramework.Modules
             await ReplyAsync(embed: e.Build());
         }
 
-        [Command("restart")]
-        [RequireOwner]
+        [Command("restart"), RequireOwner]
         [Summary("Restarts the bot.")]
         public async Task Restart(bool update = true)
         {
@@ -57,8 +56,7 @@ namespace ForsetiFramework.Modules
             Environment.Exit(0);
         }
 
-        [Command("testerror")]
-        [RequireOwner]
+        [Command("testerror"), RequireOwner]
         [Summary("Trigger an error to test the error webhook.")]
         public async Task TestError()
         {
@@ -66,9 +64,7 @@ namespace ForsetiFramework.Modules
             throw new Exception("Test Error!");
         }
 
-        [Command("sayas")]
-        [RequireRole("staff")]
-        [Syntax("sayas <user> <text>")]
+        [Command("sayas"), RequireRole("staff"), Syntax("sayas <user> <text>")]
         public async Task SayAs(SocketGuildUser usr, [Remainder]string text)
         {
             await Context.Message.DeleteAsync();
@@ -91,21 +87,14 @@ namespace ForsetiFramework.Modules
             await whclient.DeleteWebhookAsync();
         }
 
-        [Command("say")]
-        [RequireRole("staff")]
-        [Syntax("say <text>")]
-        [Typing]
+        [Command("say"), RequireRole("staff"), Syntax("say <text>"), Typing]
         public async Task Say([Remainder]string text)
         {
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync(text);
         }
 
-        [Command("fib")]
-        [Alias("fibonnaci")]
-        [Syntax("fib <n>")]
-        [RequireRole("staff")]
-        [Typing]
+        [Command("fib"), Alias("fibonnaci"), Syntax("fib <n>"), RequireRole("staff"), Typing]
         public async Task Fib(int n)
         {
             if (n <= 0) { await ReplyAsync("No."); return; }
@@ -145,8 +134,7 @@ namespace ForsetiFramework.Modules
             await ReplyAsync($"__Fibonacci Results__\nn = {n}\nTook {took} ms.\nfib(n) has {s.Length} digits.");
         }
 
-        [Command("setstatus")]
-        [RequireRole("staff")]
+        [Command("setstatus"), RequireRole("staff")]
         public async Task SetStatus([Remainder]string text)
         {
             await BotManager.Client.SetGameAsync(text, null, ActivityType.CustomStatus);
@@ -164,8 +152,7 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Event(Events.Ready)]
-        [RequireProduction]
+        [Event(Events.Ready), RequireProduction]
         public static void AutoRestartManager()
         {
             Console.WriteLine($"Scheduling auto restart...");

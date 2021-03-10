@@ -32,11 +32,9 @@ namespace ForsetiFramework.Modules
             await PostHelpEmbed(index + mod, context, helpMenuMsg);
         }
 
-        [Command("help")]
-        [Alias("?", "gethelp")]
+        [Command("help"), Alias("?", "gethelp"), Syntax("help [command]")]
         [Summary("Get a list of tags and commands.")]
-        [Syntax("help [command]")]
-        public async Task HelpNew(string cmd = "")
+        public async Task HelpNew([Remainder]string cmd = "")
         {
             cmd = cmd.ToLower();
             if (cmd == "")
@@ -56,11 +54,11 @@ namespace ForsetiFramework.Modules
 
                     foreach (var c in module.Commands)
                     {
-                        if (c.Name.ToLower() != cmd ||
+                        if (!c.Aliases.Select(s => s.ToLower()).Contains(cmd.ToLower()) ||
                             !(await c.CheckPreconditionsAsync(Context)).IsSuccess) { continue; }
 
                         var syntaxAtt = (SyntaxAttribute)c.Attributes.FirstOrDefault(a => a is SyntaxAttribute);
-                        var syntax = syntaxAtt is null ? "None" : $"`{syntaxAtt.Syntax}`";
+                        var syntax = syntaxAtt is null ? $"`{c.GetCommandString()}`" : $"`{syntaxAtt.Syntax}`";
 
                         var e = new EmbedBuilder()
                             .WithTitle(Config.Prefix + c.GetCommandString())
@@ -115,8 +113,10 @@ namespace ForsetiFramework.Modules
                 var syntaxAtt = (SyntaxAttribute)command.Attributes.FirstOrDefault(a => a is SyntaxAttribute);
                 var syntax = syntaxAtt is null ? "" : syntaxAtt.Syntax;
 
+                var aliases = command.Aliases.Skip(1).OrderBy(s => s.Length).ToList();
+                if (aliases.Count() > 2) { aliases = aliases.Take(2).ToList(); }
                 var sumString =
-                    $"{(command.Aliases.Count > 1 ? "Aliases: `" + string.Join("`, `", command.Aliases.Skip(1)) + "`" : "")}" +
+                    $"{(command.Aliases.Count > 1 ? "Aliases: `" + string.Join("`, `", aliases) + "`" : "")}" +
                     $"{(command.Summary == "" ? "" : $"\n{command.Summary}")}";
                 sumString = sumString.Trim();
                 builder.AddField(Config.Prefix + command.GetCommandString(), sumString == string.Empty ? ":)" : sumString, true);
@@ -137,10 +137,8 @@ namespace ForsetiFramework.Modules
             }
         }
 
-        [Command("tag")]
-        [RequireRole("staff")]
+        [Command("tag"), RequireRole("staff"), Syntax("tag <name> [content]")]
         [Summary("Sets or deletes tag commands.")]
-        [Syntax("tag <name> [content]")]
         public async Task Tag(string name, [Remainder]string con = "")
         {
             if (con == "" && Context.Message.Attachments.Count == 0)
@@ -165,10 +163,8 @@ namespace ForsetiFramework.Modules
             await Context.ReactOk();
         }
 
-        [Command("poll")]
-        [RequireRole("staff")]
+        [Command("poll"), RequireRole("staff"), Syntax("poll <name>\n<item1>\n<item2>\n[item3]\n...")]
         [Summary("Create a poll for users to vote on. (Max 9 items)")]
-        [Syntax("poll <name>\n<item1>\n<item2>\n[item3]\n...")]
         public async Task Poll([Remainder]string suffix)
         {
             var items = suffix.Split('\n');
