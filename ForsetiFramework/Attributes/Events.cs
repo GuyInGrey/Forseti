@@ -43,5 +43,7 @@
         UserUpdated,
         UserVoiceStateUpdated,
         VoiceServerUpdated,
+
+        CommandExecuted,
     }
 }

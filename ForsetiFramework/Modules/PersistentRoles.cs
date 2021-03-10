@@ -20,6 +20,7 @@ namespace ForsetiFramework.Modules
         }
 
         [Event(Events.GuildMemberUpdated)]
+        [RequireProduction]
         public static void UserUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
         {
             var roleString = string.Join(",", arg2.Roles.Where(r => !r.Name.Contains("everyone")).Select(r => r.Id));
@@ -28,6 +29,7 @@ namespace ForsetiFramework.Modules
         }
 
         [Event(Events.UserJoined)]
+        [RequireProduction]
         public static async Task UserJoined(SocketGuildUser arg)
         {
             var guild = BotManager.Client.GetGuild(769057370646511628);

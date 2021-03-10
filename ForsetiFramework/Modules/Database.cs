@@ -8,6 +8,7 @@ namespace ForsetiFramework.Modules
     public static class Database
     {
         public static MySqlConnection Connection;
+        public static ConnectionState State => Connection.State;
 
         public static void Init() { }
         static Database()
@@ -18,7 +19,7 @@ namespace ForsetiFramework.Modules
             catch (Exception e) { Console.WriteLine(e); return; }
         }
 
-        private static void Connection_StateChange(object sender, System.Data.StateChangeEventArgs e)
+        private static void Connection_StateChange(object sender, StateChangeEventArgs e)
         {
             if (e.CurrentState == ConnectionState.Closed || e.CurrentState == ConnectionState.Broken)
             {

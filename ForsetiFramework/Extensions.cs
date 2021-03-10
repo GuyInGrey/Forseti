@@ -16,6 +16,8 @@ namespace ForsetiFramework
 {
     public static class Extensions
     {
+        public static Random Random = new Random(new Random().Next(0, 1000));
+
         public static async Task ReactOk(this ICommandContext c) =>
             await c.Message.AddReactionAsync(new Emoji("👌"));
 
@@ -31,6 +33,9 @@ namespace ForsetiFramework
         public static int NonQuery(this string s, params object[] param)
         {
             if (s is null || s.Trim() == "") { return -1; }
+            if (Database.State == System.Data.ConnectionState.Closed || Database.State == System.Data.ConnectionState.Broken)
+            { Database.ForceReconnect(); return -2; }
+
             try
             {
                 var cmd = new MySqlCommand(s, Database.Connection);
@@ -43,16 +48,15 @@ namespace ForsetiFramework
 
                 return cmd.ExecuteNonQuery();
             }
-            catch
-            {
-                Database.ForceReconnect();
-                return NonQuery(s, param);
-            }
+            catch { return -3; }
         }
 
         public static MySqlDataReader Query(this string s, params object[] param)
         {
             if (s is null || s.Trim() == "") { return null; }
+            if (Database.State == System.Data.ConnectionState.Closed || Database.State == System.Data.ConnectionState.Broken) 
+            { Database.ForceReconnect(); return null; }
+
             try
             {
                 var cmd = new MySqlCommand(s, Database.Connection);
@@ -64,12 +68,7 @@ namespace ForsetiFramework
                 }
 
                 return cmd.ExecuteReader();
-            }
-            catch
-            {
-                Database.ForceReconnect();
-                return Query(s, param);
-            }
+            } catch { return null; }
         }
 
         public static List<ModuleInfo> GetModules(this SocketCommandContext c)
