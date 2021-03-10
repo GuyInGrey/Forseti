@@ -25,8 +25,8 @@ namespace ForsetiFramework.Constructs
 
         public static Quote Random(int maxLength = int.MaxValue)
         {
-            var q = GetQuotes();
-            return q.Where(s => s.ToString().Length <= maxLength).ToArray()[Extensions.Random.Next(q.Count)];
+            var q = GetQuotes().Where(s => s.ToString().Length <= maxLength).ToArray();
+            return q[Extensions.Random.Next(q.Length)];
         }
     }
 }

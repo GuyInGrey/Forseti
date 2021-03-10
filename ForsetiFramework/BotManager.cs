@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using ForsetiFramework.Constructs;
 using ForsetiFramework.Modules;
@@ -94,32 +95,25 @@ namespace ForsetiFramework
             await Task.Delay(-1);
         }
 
-        [Event(Events.Ready)]
-        public static void OnReady()
+        [Event(Events.Ready), Priority(1)]
+        public static async Task OnReady()
         {
-            Console.WriteLine(DateTime.Now + " > Ready");
-        }
-
-        [Event(Events.Ready)]
-        [RequireProduction]
-        public static async Task OnReadyProd()
-        {
-            Console.WriteLine(DateTime.Now + " > Ready Production");
-            var q = Quote.Random(100);
-            Console.WriteLine(DateTime.Now + " > Got quote");
             try
             {
-                Console.WriteLine(DateTime.Now + " > In Try");
+                var q = Quote.Random(100);
                 if (!(q is null))
                 {
-                    Console.WriteLine(DateTime.Now + " > q not null");
                     var s = q.ToString();
                     await Client.SetActivityAsync(new Game(s, ActivityType.Playing));
                     Console.WriteLine("Set status to ` " + s + " `");
                 }
-            } catch (Exception e) { Console.WriteLine(e); }
-            Console.WriteLine(DateTime.Now + " > Ready Production 2");
+            }
+            catch (Exception e) { Console.WriteLine(e); }
+        }
 
+        [Event(Events.Ready), RequireProduction, Priority(0)]
+        public static async Task OnReadyProd()
+        {
             try
             {
                 var botTesting = Client.GetChannel(814330280969895936) as SocketTextChannel;
@@ -127,16 +121,13 @@ namespace ForsetiFramework
                     .WithAuthor(Client.CurrentUser)
                     .WithTitle("Bot Ready!")
                     .AddField("Latency", Client.Latency + "ms", true)
-                    .AddField("Guilds", $"`{string.Join("`, `", Client.Guilds.Select(g => g.Name))}`", true)
-                    .AddField("Channels", Client.Guilds.SelectMany(g => g.Channels).Count(), true)
-                    .AddField("Status", "`" + q.ToString() + "`", true)
+                    .AddField("Status", "`" + Client.Activity.Name + "`", true)
                     .AddField("Auto Restart", $"In {(int)(BotAdmin.MSUntilRestart / 1000)} Seconds", true)
                     .WithCurrentTimestamp()
                     .WithColor(Color.Teal);
                 await botTesting.SendMessageAsync(embed: e.Build());
             }
             catch (Exception e) { Console.WriteLine(e); }
-            Console.WriteLine(DateTime.Now + " > Ready Production 3");
         }
 
         public static void DiscordEvent(string eventName, params object[] data)
@@ -145,18 +136,32 @@ namespace ForsetiFramework
             {
                 RuntimeHelpers.RunClassConstructor(t.TypeHandle);
 
-                foreach (var m in t.GetMethods().Where(m2 => m2.IsStatic))
+                t.GetMethods().Where(m =>
                 {
-                    if (!m.HasAttribute<EventAttribute>(out var att)) { continue; }
-                    if (att.EventName != eventName) { continue; }
-                    if (Config.Debug && m.HasAttribute<RequireProductionAttribute>()) { continue; }
+                    if (!m.HasAttribute<EventAttribute>(out var att)) { return false; }
+                    if (att.EventName != eventName) { return false; }
+                    if (Config.Debug && m.HasAttribute<RequireProductionAttribute>()) { return false; }
 
+                    return true;
+                }).OrderBy(m =>
+                {
+                    if (m.HasAttribute<PriorityAttribute>(out var att))
+                    {
+                        return -att.Priority;
+                    }
+                    return 0;
+                }).ToList().ForEach(m =>
+                {
                     try
                     {
-                        m?.Invoke(null, data);
+                        var r = m?.Invoke(null, data);
+                        if (r is Task task)
+                        {
+                            task.GetAwaiter().GetResult();
+                        }
                     }
                     catch { Console.WriteLine($"Invalid event: {t.Name}.{m.Name}"); }
-                }
+                });
             }
         }
     }

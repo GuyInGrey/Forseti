@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Discord;
 using Discord.Commands;
 
@@ -60,11 +61,9 @@ namespace ForsetiFramework.Modules
             var q = "SELECT * FROM `forseti`.`commandhistory` WHERE debug=0;".Query();
             while (q.Read())
             {
-                if (!counts.ContainsKey(q["commandName"].ToString()))
-                {
-                    counts.Add(q["commandName"].ToString(), 0);
-                }
-                counts[q["commandName"].ToString()]++;
+                var name = q["commandName"].ToString();
+                if (!counts.ContainsKey(name)) { counts.Add(name, 0); }
+                counts[name]++;
             }
             q.Dispose();
             var total = counts.Select(c => c.Value).Sum();
