@@ -9,7 +9,7 @@ namespace ForsetiFramework.Modules
     {
         public static SocketTextChannel General => BotManager.Client.GetChannel(814328175881355304) as SocketTextChannel;
 
-        [OnReady]
+        [Event(Events.Ready)]
         public static void Init()
         {
             @"CREATE TABLE IF NOT EXISTS `forseti`.`persistentroles` (

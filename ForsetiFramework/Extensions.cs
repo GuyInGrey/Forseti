@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 using Discord;
@@ -11,6 +14,7 @@ using Discord.WebSocket;
 using ForsetiFramework.Modules;
 
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json.Linq;
 
 namespace ForsetiFramework
 {
@@ -171,6 +175,22 @@ namespace ForsetiFramework
                 mod = mod.Parent;
             }
             return s;
+        }
+
+        public static string DownloadString(this string url)
+        {
+            using (var client = new WebClient())
+            {
+                return client.DownloadString(url.Trim());
+            }
+        }
+
+        public static dynamic DownloadJson(this string url)
+        {
+            using (var client = new WebClient())
+            {
+                return JObject.Parse(client.DownloadString(url.Trim()));
+            }
         }
     }
 }

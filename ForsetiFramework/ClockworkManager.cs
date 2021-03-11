@@ -4,6 +4,7 @@ using System.Timers;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System;
 
 namespace ForsetiFramework
 {
@@ -11,7 +12,7 @@ namespace ForsetiFramework
     {
         public static List<(Timer, MethodInfo)> Running;
 
-        [OnReady]
+        [Event(Events.Ready)]
         public static void Init()
         {
             Running = new List<(Timer, MethodInfo)>();
@@ -32,6 +33,7 @@ namespace ForsetiFramework
                             {
                                 task.GetAwaiter().GetResult();
                             }
+                            Console.WriteLine("Ran " + m.Name);
                         };
                         timer.AutoReset = true;
                         timer.Enabled = true;

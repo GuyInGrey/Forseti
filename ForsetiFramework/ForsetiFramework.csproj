@@ -169,6 +169,9 @@
     <Compile Include="Attributes\Events.cs" />
     <Compile Include="Constructs\Quote.cs" />
     <Compile Include="Eval\Eval.cs" />
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="Eval\TemplateGet.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -176,7 +179,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="Modules\ModerationEvents.cs" />
-    <Compile Include="Attributes\OnReadyAttribute.cs" />
     <Compile Include="BotManager.cs" />
     <Compile Include="ClockworkManager.cs" />
     <Compile Include="CommandManager.cs" />

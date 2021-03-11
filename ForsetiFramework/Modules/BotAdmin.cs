@@ -140,50 +140,50 @@ namespace ForsetiFramework.Modules
             await BotManager.Client.SetGameAsync(text, null, ActivityType.CustomStatus);
         }
 
-        public static int RestartHour = 3;
-        public static double MSUntilRestart
-        {
-            get
-            {
-                var now = DateTime.Now;
-                var today3am = now.Date.AddHours(RestartHour);
-                var next3am = now <= today3am ? today3am : today3am.AddDays(1);
-                return (next3am - DateTime.Now).TotalMilliseconds;
-            }
-        }
+        //public static int RestartHour = 3;
+        //public static double MSUntilRestart
+        //{
+        //    get
+        //    {
+        //        var now = DateTime.Now;
+        //        var today3am = now.Date.AddHours(RestartHour);
+        //        var next3am = now <= today3am ? today3am : today3am.AddDays(1);
+        //        return (next3am - DateTime.Now).TotalMilliseconds;
+        //    }
+        //}
 
-        [Event(Events.Ready), RequireProduction]
-        public static void AutoRestartManager()
-        {
-            Console.WriteLine($"Scheduling auto restart...");
+        //[Event(Events.Ready), RequireProduction]
+        //public static void AutoRestartManager()
+        //{
+        //    Console.WriteLine($"Scheduling auto restart...");
 
-            var t = new System.Timers.Timer()
-            {
-                Interval = MSUntilRestart,
-                AutoReset = false,
-                Enabled = true,
-            };
-            t.Elapsed += async (a, b) =>
-            {
-                await BotManager.Client.StopAsync();
-                Program.Icon.Visible = false;
+        //    var t = new System.Timers.Timer()
+        //    {
+        //        Interval = MSUntilRestart,
+        //        AutoReset = false,
+        //        Enabled = true,
+        //    };
+        //    t.Elapsed += async (a, b) =>
+        //    {
+        //        await BotManager.Client.StopAsync();
+        //        Program.Icon.Visible = false;
 
-                var p = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "restart.bat",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-                p.Start();
+        //        var p = new Process
+        //        {
+        //            StartInfo = new ProcessStartInfo()
+        //            {
+        //                FileName = "restart.bat",
+        //                UseShellExecute = false,
+        //                CreateNoWindow = true,
+        //            }
+        //        };
+        //        p.Start();
 
-                Application.Exit();
-                Environment.Exit(0);
-            };
+        //        Application.Exit();
+        //        Environment.Exit(0);
+        //    };
 
-            Console.WriteLine($"Scheduled autorestart for hour {RestartHour}, {MSUntilRestart / 1000} seconds from now.");
-        }
+        //    Console.WriteLine($"Scheduled autorestart for hour {RestartHour}, {MSUntilRestart / 1000} seconds from now.");
+        //}
     }
 }

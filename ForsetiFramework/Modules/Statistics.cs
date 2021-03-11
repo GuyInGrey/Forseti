@@ -12,11 +12,26 @@ namespace ForsetiFramework.Modules
     [Group("Statistics"), Alias("stats")]
     public class Statistics : ModuleBase<SocketCommandContext>
     {
-        [Clockwork(60 * 60 * 1000)]
-        public static void Hourly()
-        {
-            Console.WriteLine(DateTime.Now + " : Test");
-        }
+        public static PerformanceCounter NetworkTraffic;
+        public static float PulsedBytes;
+
+        //[Clockwork(5000)]
+        //public static void H1()
+        //{
+        //    //Console.WriteLine(DateTime.Now + " : Test");
+        //    PulsedBytes += NetworkTraffic.NextValue();
+        //     += val;
+        //    Moderation.ModLogs.SendMessageAsync(val + "\n" + PulsedBytes);
+        //}
+
+        //[Clockwork(5000)]
+        //public static void H2()
+        //{
+        //    //Console.WriteLine(DateTime.Now + " : Test");
+        //    var val = NetworkTraffic.NextValue();
+        //    PulsedBytes += val;
+        //    Moderation.ModLogs.SendMessageAsync(val + "\n" + PulsedBytes);
+        //}
 
         [Command("pulse"), RequireRole("staff")]
         public async Task Pulse()
@@ -89,6 +104,8 @@ namespace ForsetiFramework.Modules
   `success` TINYINT NULL,
   `channel` BIGINT(18) NULL,
   `error` VARCHAR(150) NULL);".NonQuery();
+
+            NetworkTraffic = new PerformanceCounter("Network Adapter", "Bytes Total/sec", "Intel[R] Ethernet Connection [2] I219-V");
         }
 
         [Event(Events.CommandExecuted), RequireRole("staff")]

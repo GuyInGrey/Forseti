@@ -8,7 +8,7 @@ namespace ForsetiFramework.Modules
 {
     public static class Tags
     {
-        [OnReady]
+        [Event(Events.Ready)]
         public static void Init()
         {
             @"CREATE TABLE IF NOT EXISTS `forseti`.`tags` (

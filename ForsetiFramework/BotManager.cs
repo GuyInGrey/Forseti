@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -36,7 +37,6 @@ namespace ForsetiFramework
             Client.MessageReceived += CommandManager.HandleCommands;
             Client.MessageUpdated += async (a, b, c) => await CommandManager.HandleCommands(b);
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             Client.ChannelCreated += async (a) => DiscordEvent("ChannelCreated", a);
             Client.ChannelDestroyed += async (a) => DiscordEvent("ChannelDestroyed", a);
             Client.ChannelUpdated += async (a, b) => DiscordEvent("ChannelUpdated", a, b);
@@ -81,7 +81,6 @@ namespace ForsetiFramework
 
             CommandManager.Commands.CommandExecuted += async (a, b, c) => DiscordEvent("CommandExecuted", a, b, c);
             CommandManager.Commands.Log += async (a) => DiscordEvent("CommandExecuted", a);
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         }
 
         public static async Task Start()
@@ -122,7 +121,6 @@ namespace ForsetiFramework
                     .WithTitle("Bot Ready!")
                     .AddField("Latency", Client.Latency + "ms", true)
                     .AddField("Status", "`" + Client.Activity.Name + "`", true)
-                    .AddField("Auto Restart", $"In {(int)(BotAdmin.MSUntilRestart / 1000)} Seconds", true)
                     .WithCurrentTimestamp()
                     .WithColor(Color.Teal);
                 await botTesting.SendMessageAsync(embed: e.Build());
@@ -160,7 +158,7 @@ namespace ForsetiFramework
                             task.GetAwaiter().GetResult();
                         }
                     }
-                    catch { Console.WriteLine($"Invalid event: {t.Name}.{m.Name}"); }
+                    catch (Exception err) { Console.WriteLine($"Invalid event: {t.Name}.{m.Name}\n" + err); }
                 });
             }
         }
