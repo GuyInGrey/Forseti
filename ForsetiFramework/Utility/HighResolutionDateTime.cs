@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ForsetiFramework
+namespace ForsetiFramework.Utility
 {
     public static class HighResolutionDateTime
     {

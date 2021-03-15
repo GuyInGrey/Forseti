@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Discord;
 using Discord.WebSocket;
+using ProfanityFilter;
 
 namespace ForsetiFramework.Modules
 {
@@ -197,8 +198,7 @@ namespace ForsetiFramework.Modules
             }
 
             // Softer, don't auto-delete
-            var filter = new ProfanityFilter.ProfanityFilter();
-            filter.AddProfanity(SoftNo);
+            var filter = NewFilter();
             var list = filter.DetectAllProfanities(content);
             if (list.Count > 0)
             {
@@ -222,6 +222,13 @@ namespace ForsetiFramework.Modules
             {
                 await eM.AddReactionsAsync(CardReactions);
             });
+        }
+
+        public static ProfanityFilter.ProfanityFilter NewFilter()
+        {
+            var filter = new ProfanityFilter.ProfanityFilter();
+            filter.AddProfanity(SoftNo);
+            return filter;
         }
     }
 }

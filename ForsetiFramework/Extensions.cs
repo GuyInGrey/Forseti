@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Policy;
+using System.Text;
 using System.Threading.Tasks;
 
 using Discord;
@@ -15,6 +17,7 @@ using ForsetiFramework.Modules;
 
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json.Linq;
+using Processing;
 
 namespace ForsetiFramework
 {
@@ -38,7 +41,7 @@ namespace ForsetiFramework
         {
             if (s is null || s.Trim() == "") { return -1; }
             if (Database.State == System.Data.ConnectionState.Closed || Database.State == System.Data.ConnectionState.Broken)
-            { Database.ForceReconnect(); return -2; }
+            { Database.ForceReconnect(); }
 
             try
             {
@@ -59,7 +62,7 @@ namespace ForsetiFramework
         {
             if (s is null || s.Trim() == "") { return null; }
             if (Database.State == System.Data.ConnectionState.Closed || Database.State == System.Data.ConnectionState.Broken) 
-            { Database.ForceReconnect(); return null; }
+            { Database.ForceReconnect(); }
 
             try
             {
@@ -191,6 +194,70 @@ namespace ForsetiFramework
             {
                 return JObject.Parse(client.DownloadString(url.Trim()));
             }
+        }
+
+        public static Sprite DownloadImage(this string url)
+        {
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(url, "temp.png");
+                var s = Sprite.FromFilePath("temp.png");
+                File.Delete("temp.png");
+                return s;
+            }
+        }
+        
+        public static async Task Send(this Sprite s, SocketCommandContext c)
+        {
+            s.Save("temp.png");
+            await c.Channel.SendFileAsync("temp.png");
+            File.Delete("temp.png");
+        }
+
+        public static void ForeachPixel(this Sprite s, Action<int, int> toRun)
+        {
+            for (var y = 0; y < s.Height; y++)
+            {
+                for (var x = 0; x < s.Width; x++)
+                {
+                    toRun?.Invoke(x, y);
+                }
+            }
+        }
+
+        public static string Replace(this string str, int pos, char replacement)
+        {
+            str = str.Substring(0, pos) + replacement + str.Substring(pos + 1);
+            return str;
+        }
+
+        public static Sprite ForeachPixel(this Sprite s, Func<int, int, Paint, Paint> toRun)
+        {
+            for (var y= 0; y < s.Height; y++)
+            {
+                for (var x = 0; x < s.Width; x++)
+                {
+                    s.Art.Set(x, y, toRun.Invoke(x, y, s.Art.GetPixel(x, y)));
+                }
+            }
+
+            return s;
+        }
+
+        public static Sprite GetAvatarSprite(this IUser user, ushort size)
+        {
+            var av = user.GetAvatarUrl(ImageFormat.Png, size);
+            return av is null ? user.GetDefaultAvatarUrl().DownloadImage() : av.DownloadImage();
+        }
+
+        public static string Shuffle(this String str)
+        {
+            var list = new SortedList<int, char>();
+            foreach (var c in str)
+            {
+                list.Add(Random.Next(), c);
+            }
+            return new string(list.Values.ToArray());
         }
     }
 }

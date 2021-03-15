@@ -9,7 +9,7 @@ using Discord.WebSocket;
 
 namespace ForsetiFramework.Modules
 {
-    public class Utility : ModuleBase<SocketCommandContext>
+    public class UtilityCmd : ModuleBase<SocketCommandContext>
     {
         static Dictionary<ulong, (SocketCommandContext context, RestUserMessage helpMenuMsg)> HelpMenus =
             new Dictionary<ulong, (SocketCommandContext, RestUserMessage)>();
@@ -43,13 +43,14 @@ namespace ForsetiFramework.Modules
             }
             else
             {
+                var showed = false;
                 foreach (var module in Context.GetModules())
                 {
                     if (module.Name.ToLower() == cmd)
                     {
                         var index = Context.GetModules().Where(m => m.Parent is null).ToList().IndexOf(module);
                         await PostHelpEmbed(index, Context);
-                        return;
+                        showed = true;
                     }
 
                     foreach (var c in module.Commands)
@@ -73,11 +74,13 @@ namespace ForsetiFramework.Modules
                         }
 
                         await Context.Channel.SendMessageAsync(embed: e.Build());
-                        return;
+                        showed = true;
                     }
                 }
-                await Context.ReactError();
-                return;
+                if (!showed)
+                {
+                    await Context.ReactError();
+                }
             }
         }
 
@@ -110,14 +113,16 @@ namespace ForsetiFramework.Modules
                 .Where(c => c.Module == module || (!(module.Group is null) && c.GetCommandString().StartsWith(module.Group.ToLower() + " "))))
             {
                 if (!(await command.CheckPreconditionsAsync(context)).IsSuccess) { continue; }
+
                 var syntaxAtt = (SyntaxAttribute)command.Attributes.FirstOrDefault(a => a is SyntaxAttribute);
-                var syntax = syntaxAtt is null ? "" : syntaxAtt.Syntax;
+                var syntax = syntaxAtt is null ? $"`{command.GetCommandString()}`" : $"`{syntaxAtt.Syntax}`";
 
                 var aliases = command.Aliases.Skip(1).OrderBy(s => s.Length).ToList();
                 if (aliases.Count() > 2) { aliases = aliases.Take(2).ToList(); }
                 var sumString =
                     $"{(command.Aliases.Count > 1 ? "Aliases: `" + string.Join("`, `", aliases) + "`" : "")}" +
-                    $"{(command.Summary == "" ? "" : $"\n{command.Summary}")}";
+                    $"{(command.Summary == "" ? "" : $"\n{command.Summary}")}" +
+                    $"\n\n{syntax}";
                 sumString = sumString.Trim();
                 builder.AddField(Config.Prefix + command.GetCommandString(), sumString == string.Empty ? ":)" : sumString, true);
             }

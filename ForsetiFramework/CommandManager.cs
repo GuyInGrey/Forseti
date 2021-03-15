@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using ForsetiFramework.Modules;
 
 namespace ForsetiFramework
@@ -31,7 +30,7 @@ namespace ForsetiFramework
                 ThrowOnError = false,
             });
 
-            Commands.Log += BotManager.Logger.Client_Log;
+            Commands.Log += async (msg) => await Log.FromLogMessage(msg).Post();
             Commands.CommandExecuted += Commands_CommandExecuted;
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
         }
@@ -57,13 +56,6 @@ namespace ForsetiFramework
                 else
                 {
                     await context.Channel.SendMessageAsync($"I've run into an error ({result.Error}). I've let staff know.");
-                    var e = new EmbedBuilder()
-                        .WithTitle("Failed command.")
-                        .WithDescription($"`{context.Message.Content}` - {context.User.Username}#{context.User.Discriminator}")
-                        .AddField("Error", $"`{result.Error}`")
-                        .AddField("Error Reason", $"`{result.ErrorReason}`")
-                        .WithCurrentTimestamp();
-                    await BotManager.Logger.ErrorsClient.SendMessageAsync(embeds: new[] { e.Build() });
                 }
             }
         }

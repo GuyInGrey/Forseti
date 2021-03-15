@@ -10,6 +10,7 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using ForsetiFramework.Utility;
 
 namespace ForsetiFramework.Modules
 {

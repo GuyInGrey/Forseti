@@ -8,6 +8,7 @@ using Discord.WebSocket;
 
 namespace ForsetiFramework
 {
+    [Obsolete("Use the Log class now.", true)]
     public class LoggingService
     {
         public DiscordWebhookClient ErrorsClient;

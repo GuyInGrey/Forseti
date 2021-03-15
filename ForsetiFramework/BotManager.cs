@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -16,13 +15,11 @@ namespace ForsetiFramework
     public static class BotManager
     {
         public static Config Config;
-        public static LoggingService Logger;
         public static DiscordSocketClient Client;
 
         public static void Init()
         {
             Config = Config.Load(Config.Path + "config.json");
-            Logger = new LoggingService();
 
             Client = new DiscordSocketClient(new DiscordSocketConfig()
             {
@@ -33,7 +30,7 @@ namespace ForsetiFramework
                 RateLimitPrecision = RateLimitPrecision.Millisecond,
                 ExclusiveBulkDelete = true,
             });
-            Client.Log += Logger.Client_Log;
+            Client.Log += async (msg) => await Log.FromLogMessage(msg).Post();
             Client.MessageReceived += CommandManager.HandleCommands;
             Client.MessageUpdated += async (a, b, c) => await CommandManager.HandleCommands(b);
 
@@ -103,7 +100,7 @@ namespace ForsetiFramework
                 if (!(q is null))
                 {
                     var s = q.ToString();
-                    await Client.SetActivityAsync(new Game(s, ActivityType.Playing));
+                    await Client.SetActivityAsync(new Discord.Game(s, ActivityType.Playing));
                     Console.WriteLine("Set status to ` " + s + " `");
                 }
             }
@@ -113,23 +110,19 @@ namespace ForsetiFramework
         [Event(Events.Ready), RequireProduction, Priority(0)]
         public static async Task OnReadyProd()
         {
-            try
+            await new Log()
             {
-                var botTesting = Client.GetChannel(814330280969895936) as SocketTextChannel;
-                var e = new EmbedBuilder()
-                    .WithAuthor(Client.CurrentUser)
-                    .WithTitle("Bot Ready!")
-                    .AddField("Latency", Client.Latency + "ms", true)
-                    .AddField("Status", "`" + Client.Activity.Name + "`", true)
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Teal);
-                await botTesting.SendMessageAsync(embed: e.Build());
+                Title = "Bot ready!",
             }
-            catch (Exception e) { Console.WriteLine(e); }
+                .WithField("Latency", Client.Latency + "ms")
+                .WithField("Status", $"`{Client.Activity.Name}`")
+                .Post();
         }
 
         public static void DiscordEvent(string eventName, params object[] data)
         {
+            Console.WriteLine(eventName);
+
             foreach (var t in Assembly.GetExecutingAssembly().GetTypes())
             {
                 RuntimeHelpers.RunClassConstructor(t.TypeHandle);
@@ -153,10 +146,6 @@ namespace ForsetiFramework
                     try
                     {
                         var r = m?.Invoke(null, data);
-                        if (r is Task task)
-                        {
-                            task.GetAwaiter().GetResult();
-                        }
                     }
                     catch (Exception err) { Console.WriteLine($"Invalid event: {t.Name}.{m.Name}\n" + err); }
                 });
