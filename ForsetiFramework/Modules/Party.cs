@@ -126,16 +126,10 @@ namespace ForsetiFramework.Modules
             party.Guests = guests.ToArray();
 
             var vc = Context.Guild.GetVoiceChannel(party.VoiceChannel);
-            try
-            {
-                await vc.AddPermissionOverwriteAsync(usr, new OverwritePermissions(viewChannel: PermValue.Allow, connect: PermValue.Allow));
-            }
-            catch { }
-            try
-            {
-                await (Context.Channel as SocketGuildChannel).AddPermissionOverwriteAsync(usr, new OverwritePermissions(viewChannel: PermValue.Allow, connect: PermValue.Allow));
-            }
-            catch { }
+            await vc.AddPermissionOverwriteAsync(usr, 
+                new OverwritePermissions(viewChannel: PermValue.Allow, connect: PermValue.Allow));
+            await (Context.Channel as SocketGuildChannel).AddPermissionOverwriteAsync(usr, 
+                new OverwritePermissions(viewChannel: PermValue.Allow, connect: PermValue.Allow));
 
             var parties = PartyInfo.GetAll();
             parties.RemoveAll(p => p.TextChannel == party.TextChannel);
@@ -168,16 +162,10 @@ namespace ForsetiFramework.Modules
             party.Guests = guests.ToArray();
 
             var vc = Context.Guild.GetVoiceChannel(party.VoiceChannel);
-            try
-            {
-                await vc.AddPermissionOverwriteAsync(usr, new OverwritePermissions(viewChannel: PermValue.Deny, connect: PermValue.Deny));
-            }
-            catch { }
-            try
-            {
-                await (Context.Channel as SocketGuildChannel).AddPermissionOverwriteAsync(usr, new OverwritePermissions(viewChannel: PermValue.Deny, connect: PermValue.Deny));
-            }
-            catch { }
+            await vc.AddPermissionOverwriteAsync(usr, 
+                new OverwritePermissions(viewChannel: PermValue.Deny, connect: PermValue.Deny));
+            await (Context.Channel as SocketGuildChannel).AddPermissionOverwriteAsync(usr, 
+                new OverwritePermissions(viewChannel: PermValue.Deny, connect: PermValue.Deny));
 
             var parties = PartyInfo.GetAll();
             parties.RemoveAll(p => p.TextChannel == party.TextChannel);
