@@ -35,10 +35,13 @@ namespace ForsetiFramework.Modules
         [Command("avatar"), Summary("Get a user's avatar."), Syntax("avatar [user]")]
         public async Task Avatar(SocketGuildUser usr = null)
         {
+            var url = usr.GetAvatarUrl(ImageFormat.Png, 2048);
+            url = url is null ? usr.GetDefaultAvatarUrl() : url;
+
             usr = usr is null ? Context.Message.Author as SocketGuildUser : usr;
             var e = new EmbedBuilder()
                 .WithTitle("Avatar")
-                .WithImageUrl(usr.GetAvatarUrl(ImageFormat.Png, 2048))
+                .WithImageUrl(url)
                 .WithColor(Color.Green)
                 .WithAuthor(usr)
                 .WithCurrentTimestamp();

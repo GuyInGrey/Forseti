@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 
 using Discord;
@@ -258,6 +255,36 @@ namespace ForsetiFramework
                 list.Add(Random.Next(), c);
             }
             return new string(list.Values.ToArray());
+        }
+
+        public static async Task<IEnumerable<IMessage>> DownloadAllMessages(this IMessageChannel ch)
+        {
+            var m = await ch.GetMessagesAsync(100).FlattenAsync();
+            while (m.Count() > 0)
+            {
+                Console.WriteLine($"Downloading messages: {ch.Name} - {m.Count()}");
+                var m2 = await ch.GetMessagesAsync(m.Last(), Direction.Before, 100).FlattenAsync();
+                if (m2.Count() == 0) { break; }
+                m = m.Concat(m2);
+            }
+            return m.Reverse();
+        }
+
+        public static async Task SendTextFile(this IMessageChannel ch, string text, string name, string content = null)
+        {
+            File.WriteAllText(name, text);
+            await ch.SendFileAsync(name, content);
+            File.Delete(name);
+        }
+
+        public static async Task<string> Format(this IEnumerable<IMessage> messages)
+        {
+            var toReturn = "";
+            foreach (var m in messages)
+            {
+                toReturn += $"[{m.Author}][{m.Timestamp}]{(m.Embeds.Count > 0 ? "[Contains Embeds]" : "")} > {m.Content}\n\n";
+            }
+            return toReturn;
         }
     }
 }

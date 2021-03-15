@@ -12,6 +12,7 @@ namespace ForsetiFramework.Constructs
         public ulong[] Guests;
         public ulong TextChannel;
         public ulong VoiceChannel;
+        public DateTime CreationTime;
 
         public static string Path => Config.Path + @"Parties\";
 

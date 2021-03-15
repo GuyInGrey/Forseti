@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -142,6 +143,21 @@ namespace ForsetiFramework.Modules
             }
         }
 
+        [Command("ping")]
+        [Summary("Pong!")]
+        public async Task Ping()
+        {
+            var ping = Context.Client.Latency;
+
+            var e = new EmbedBuilder()
+                .WithTitle("Pong!")
+                .WithDescription(ping + "ms")
+                .WithColor(ping < 200 ? Color.Green : ping < 500 ? Color.LightOrange : Color.Red)
+                .WithCurrentTimestamp();
+
+            await ReplyAsync(embed: e.Build());
+        }
+
         [Command("tag"), RequireRole("staff"), Syntax("tag <name> [content]")]
         [Summary("Sets or deletes tag commands.")]
         public async Task Tag(string name, [Remainder]string con = "")
@@ -195,6 +211,47 @@ namespace ForsetiFramework.Modules
             {
                 await m.AddReactionAsync(new Emoji(nums[i]));
             }
+        }
+
+        public enum TimeUnit { Minutes, Hours, Days, Minute, Hour, Day }
+
+        [Command("remindmein")]
+        [Syntax("remindmein <number> <minutes/hours/days> <reminder>")]
+        [Summary("Want a reminder? The bot will send you a message at the give time.")]
+        public async Task RemindMeIn(int num, TimeUnit unit, [Remainder]string text)
+        {
+            var span = new TimeSpan(
+                unit == TimeUnit.Days || unit == TimeUnit.Day ? num : 0, 
+                unit == TimeUnit.Hours || unit == TimeUnit.Hour ? num : 0, 
+                unit == TimeUnit.Minutes || unit == TimeUnit.Minute ? num : 0, 0);
+            var newTime = DateTime.Now.Add(span);
+            "INSERT INTO reminders (user, time, reminder) VALUES (@p0, @p1, @p2)".NonQuery(Context.User.Id, newTime, text);
+            await Context.ReactOk();
+        }
+
+        [Clockwork(5000)]
+        public static async Task RemindMeClockwork()
+        {
+            var now = DateTime.Now;
+            var q = "SELECT * FROM reminders WHERE time < @p0".Query(now);
+            try
+            {
+                while (q.Read())
+                {
+                    var time = DateTime.Parse(q["time"].ToString());
+                    var userId = ulong.Parse(q["user"].ToString());
+                    var text = q["reminder"].ToString();
+                    var user = BotManager.Client.GetUser(userId);
+                    if (user is null) { continue; }
+                    try
+                    {
+                        await user.SendMessageAsync($"Reminder for {time}: `{text}`");
+                    } catch { }
+                }
+            }
+            finally { q?.Dispose(); }
+
+            "DELETE FROM reminders WHERE time < @p0".NonQuery(now);
         }
     }
 }

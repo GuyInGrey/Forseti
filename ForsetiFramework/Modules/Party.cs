@@ -35,6 +35,7 @@ namespace ForsetiFramework.Modules
             {
                 Host = Context.User.Id,
                 Guests = new ulong[0],
+                CreationTime = DateTime.Now,
             };
 
             var channel = await Context.Guild.CreateTextChannelAsync(name.ToLower().Replace(" ", "-"), prop =>
@@ -73,7 +74,7 @@ namespace ForsetiFramework.Modules
             var all = PartyInfo.GetAll();
             all.Add(party);
             PartyInfo.SaveParties(all);
-            await ReplyAsync($"Created your new party, {Context.User.Mention}! {channel.Mention}");
+            await channel.SendMessageAsync($"Party `{name}` created, {Context.User.Mention}! It will be automatically deleted in 24 hours.");
         }
 
         [Command("delete")]
@@ -91,16 +92,46 @@ namespace ForsetiFramework.Modules
                 await Context.ReactError();
                 return;
             }
+            await Context.ReactOk();
 
+            var messages = await Context.Channel.DownloadAllMessages();
+            var text = await messages.Format();
+
+            foreach (var u in party.Guests.Append(party.Host))
+            {
+                var user = BotManager.Client.GetUser(u);
+                if (user is null) { return; }
+                try
+                {
+                    var dm = await user.GetOrCreateDMChannelAsync();
+                    await dm.SendTextFile(text, Context.Channel.Name + "-messages.txt", 
+                        $"The party you were in, {Context.Channel.Name}, was deleted.");
+                } catch { }
+            }
+
+            await new Log()
+            {
+                Author = Context.Message.Author,
+                ChannelToPost = LogChannel.ModLogs,
+                Color = Color.Green,
+                Title = "Party Deleted",
+                Content = Context.Channel.Name,
+            }.Post();
+
+            await DeleteParty(party);
+            await Context.User.SendMessageAsync($"Your party, {Context.Channel.Name}, has been deleted.");
+        }
+
+        public static async Task DeleteParty(PartyInfo party)
+        {
             var parties = PartyInfo.GetAll();
             parties.RemoveAll(p => p.TextChannel == party.TextChannel);
             PartyInfo.SaveParties(parties);
 
-            var name = Context.Channel.Name;
-            var vc = Context.Guild.GetVoiceChannel(party.VoiceChannel);
-            await (Context.Channel as SocketGuildChannel).DeleteAsync();
-            await vc.DeleteAsync();
-            await Context.User.SendMessageAsync($"Your party, {name}, has been deleted.");
+            var tc = BotManager.Client.Guilds.First().GetTextChannel(party.TextChannel);
+            var vc = BotManager.Client.Guilds.First().GetVoiceChannel(party.VoiceChannel);
+            await tc?.DeleteAsync();
+            await vc?.DeleteAsync();
         }
 
         [Command("addguest")]
@@ -173,6 +204,52 @@ namespace ForsetiFramework.Modules
             PartyInfo.SaveParties(parties);
 
             await Context.ReactOk();
+        }
+
+        [Clockwork(300000)]
+        public static async Task PartyAutoDelete()
+        {
+            foreach (var p in PartyInfo.GetAll())
+            {
+                if (p.CreationTime.Add(new TimeSpan(24, 0, 0)) > DateTime.Now) { continue; }
+                var tc = BotManager.Client.Guilds.First().GetTextChannel(p.TextChannel);
+
+                var messages = await tc.DownloadAllMessages();
+                var text = await messages.Format();
+
+                foreach (var u in p.Guests.Append(p.Host))
+                {
+                    var user = BotManager.Client.GetUser(u);
+                    if (user is null) { return; }
+                    try
+                    {
+                        var dm = await user.GetOrCreateDMChannelAsync();
+                        await dm.SendTextFile(text, tc.Name + "-messages.txt",
+                            $"The party you were in, {tc.Name}, was deleted.");
+                    }
+                    catch { }
+                }
+
+                await new Log()
+                {
+                    ChannelToPost = LogChannel.ModLogs,
+                    Color = Color.Green,
+                    Title = "Party Deleted After 24 Hours",
+                    Content = tc.Name,
+                }.Post();
+
+                await DeleteParty(p);
+                var host = BotManager.Client.GetUser(p.Host);
+                if (!(host is null))
+                {
+                    try
+                    {
+                        await host.SendMessageAsync($"Your party, {tc.Name}, has been deleted after 24 hours.");
+                    } catch { }
+                }
+
+                await DeleteParty(p);
+            }
         }
     }
 }

@@ -14,23 +14,8 @@ using ForsetiFramework.Utility;
 
 namespace ForsetiFramework.Modules
 {
-    public class BotAdmin : ModuleBase<SocketCommandContext>
+    public partial class BotAdmin : ModuleBase<SocketCommandContext>
     {
-        [Command("ping")]
-        [Summary("Pong!")]
-        public async Task Ping()
-        {
-            var ping = Context.Client.Latency;
-
-            var e = new EmbedBuilder()
-                .WithTitle("Pong!")
-                .WithDescription(ping + "ms")
-                .WithColor(ping < 200 ? Color.Green : ping < 500 ? Color.LightOrange : Color.Red)
-                .WithCurrentTimestamp();
-
-            await ReplyAsync(embed: e.Build());
-        }
-
         [Command("restart"), RequireOwner]
         [Summary("Restarts the bot.")]
         public async Task Restart(bool update = true)
@@ -73,9 +58,12 @@ namespace ForsetiFramework.Modules
             var ch = Context.Channel as SocketTextChannel;
             RestWebhook webhook = null;
 
+            var url = usr.GetAvatarUrl();
+            url = url is null ? usr.GetDefaultAvatarUrl() : url;
+
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync(usr.GetAvatarUrl());
+                var response = await client.GetAsync(url);
                 using (var stream = await response.Content.ReadAsStreamAsync())
                 {
                     var name = usr.Nickname is null ? usr.Username : usr.Nickname;
