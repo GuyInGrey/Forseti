@@ -36,13 +36,17 @@ namespace ForsetiFramework.Modules
         [Command("pulse"), RequireRole("staff")]
         public async Task Pulse()
         {
+            start:;
+
             var q = "SELECT COUNT(*) FROM `forseti`.`commandhistory` WHERE time > @p0;"
                 .Query(DateTime.Now.Subtract(new TimeSpan(24, 0, 0)));
+            if (q is null) { goto start; }
             q.Read();
             var lastDayCount = int.Parse(q["COUNT(*)"].ToString());
             q.Dispose();
             q = "SELECT COUNT(*) FROM `forseti`.`commandhistory` WHERE time > @p0;"
                 .Query(Process.GetCurrentProcess().StartTime);
+            if (q is null) { goto start; }
             q.Read();
             var botStartCount = int.Parse(q["COUNT(*)"].ToString());
             q.Dispose();
@@ -71,6 +75,7 @@ namespace ForsetiFramework.Modules
         {
             var counts = new Dictionary<string, int>();
             var q = "SELECT * FROM `forseti`.`commandhistory` WHERE debug=0;".Query();
+            if (q is null) { return; }
             while (q.Read())
             {
                 var name = q["commandName"].ToString();

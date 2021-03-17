@@ -207,9 +207,9 @@ namespace ForsetiFramework.Modules
                 return;
             }
 
-            if (m.Content.Length > 1000)
+            if (m.Content.Length > 1900)
             {
-                card.AddField("Reason", "Message length > 1000", true);
+                card.AddField("Reason", "Message length > 1900", true);
                 await CreateModCard(card);
                 return;
             }

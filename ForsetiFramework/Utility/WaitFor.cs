@@ -9,6 +9,9 @@ namespace ForsetiFramework.Utility
     {
         public static List<(ulong, Func<SocketUserMessage, Task<bool>>)> WaitingFor = new List<(ulong, Func<SocketUserMessage, Task<bool>>)>();
 
+        /// <summary>
+        /// `true` means it's done and will stop waiting.
+        /// </summary>
         public static void WaitForMessage(this ulong ch, Func<SocketUserMessage, Task<bool>> toRun) =>
             WaitingFor.Add((ch, toRun));
 

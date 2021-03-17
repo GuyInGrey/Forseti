@@ -234,6 +234,7 @@ namespace ForsetiFramework.Modules
         {
             var now = DateTime.Now;
             var q = "SELECT * FROM reminders WHERE time < @p0".Query(now);
+            if (q is null) { return; }
             try
             {
                 while (q.Read())

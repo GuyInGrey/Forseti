@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -177,6 +178,14 @@ namespace ForsetiFramework
             return s;
         }
 
+        public static void TempDirectory()
+        {
+            if (!Directory.Exists("temp"))
+            {
+                Directory.CreateDirectory("temp");
+            }
+        }
+
         public static string DownloadString(this string url)
         {
             using (var client = new WebClient())
@@ -195,20 +204,35 @@ namespace ForsetiFramework
 
         public static Sprite DownloadImage(this string url)
         {
+            TempDirectory();
             using (var client = new WebClient())
             {
-                client.DownloadFile(url, "temp.png");
-                var s = Sprite.FromFilePath("temp.png");
-                File.Delete("temp.png");
+                client.DownloadFile(url, "temp/temp.png");
+                var s = Sprite.FromFilePath("temp/temp.png");
+                File.Delete("temp/temp.png");
                 return s;
+            }
+        }
+
+        /// <summary>
+        /// Delete file when done!
+        /// </summary>
+        public static string DownloadFile(this string url)
+        {
+            TempDirectory();
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(url, "temp/" + Path.GetFileName(url));
+                return "temp/" + Path.GetFileName(url);
             }
         }
         
         public static async Task Send(this Sprite s, SocketCommandContext c)
         {
-            s.Save("temp.png");
-            await c.Channel.SendFileAsync("temp.png");
-            File.Delete("temp.png");
+            TempDirectory();
+            s.Save("temp/temp.png");
+            await c.Channel.SendFileAsync("temp/temp.png");
+            File.Delete("temp/temp.png");
         }
 
         public static void ForeachPixel(this Sprite s, Action<int, int> toRun)
@@ -285,6 +309,53 @@ namespace ForsetiFramework
                 toReturn += $"[{m.Author}][{m.Timestamp}]{(m.Embeds.Count > 0 ? "[Contains Embeds]" : "")} > {m.Content}\n\n";
             }
             return toReturn;
+        }
+
+        public static IEnumerable<List<T>> SplitList<T>(this List<T> locations, int nSize = 30)
+        {
+            for (var i = 0; i < locations.Count; i += nSize)
+            {
+                yield return locations.GetRange(i, Math.Min(nSize, locations.Count - i));
+            }
+        }
+
+        public static async Task<string> CompileIntoVideo(this IEnumerable<Sprite> sprites, int framerate)
+        {
+            var path = @"C:\RenderingTemp\";
+
+            if (Directory.Exists(path)) { try { Directory.Delete(path, true); } catch { } }
+            Directory.CreateDirectory(path);
+
+            var i = 0;
+            foreach (var s in sprites)
+            {
+                s.Save($"{path}{i:000000}.png");
+                i++;
+            }
+
+            var pInfo = new ProcessStartInfo()
+            {
+                FileName = "ffmpeg",
+                Arguments = $" -framerate {framerate} -i %06d.png -c:v libx264 -r {framerate} output.mp4",
+                WorkingDirectory = path,
+            };
+            var p = Process.Start(pInfo);
+            p.WaitForExit();
+
+            return $"{path}output.mp4";
+            var a = 0.0001f;
+        }
+
+        public static async Task FFMPEG(string args, string workingDir)
+        {
+            var pInfo = new ProcessStartInfo()
+            {
+                FileName = "ffmpeg",
+                Arguments = args,
+                WorkingDirectory = workingDir,
+            };
+            var p = Process.Start(pInfo);
+            p.WaitForExit();
         }
     }
 }
